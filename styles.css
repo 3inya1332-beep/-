@@ -65,6 +65,92 @@ body {
   align-items: start;
 }
 
+.map-wrap {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0e1525, #0a101d);
+  padding: 6px;
+  overflow: hidden;
+}
+
+#cityMap {
+  width: 100%;
+  display: block;
+}
+
+#cityMap rect {
+  fill: #182640;
+  stroke: #2e456f;
+  stroke-width: 2;
+  transition: fill 0.2s ease, transform 0.2s ease, stroke 0.2s ease;
+  cursor: pointer;
+}
+
+#cityMap rect:hover {
+  fill: #24406b;
+}
+
+#cityMap rect.selected {
+  fill: #2a5ca1;
+  stroke: #78b2ff;
+}
+
+#cityMap rect.current {
+  fill: #236f58;
+  stroke: #76f8c8;
+}
+
+.player-marker {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e8fff7, #5bf3c1);
+  box-shadow: 0 0 0 4px rgb(91 243 193 / 25%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: left 0.45s ease, top 0.45s ease;
+}
+
+.actions-list {
+  display: grid;
+  gap: 10px;
+}
+
+.action-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #101a2b;
+  padding: 10px;
+  animation: fadeIn 0.2s ease;
+}
+
+.action-card h5 {
+  margin: 0 0 6px;
+}
+
+.action-card .meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.action-card button {
+  margin-top: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 label {
   display: block;
   color: var(--muted);
@@ -146,6 +232,13 @@ select:focus {
 #relationBlock,
 #carInfo {
   line-height: 1.5;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
 }
 
 .separator {

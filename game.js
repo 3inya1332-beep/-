@@ -2,348 +2,398 @@ const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-const CITIES = [
-  "Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск",
-  "Краснодар", "Ростов-на-Дону", "Нижний Новгород", "Самара", "Челябинск",
-  "Тюмень", "Уфа", "Пермь", "Воронеж",
-];
-
 const MALE_NAMES = [
-  "Артем", "Максим", "Никита", "Илья", "Даниил", "Кирилл", "Тимур", "Егор", "Иван", "Алексей",
-  "Сергей", "Павел", "Роман", "Михаил", "Олег", "Глеб", "Руслан", "Денис", "Владислав", "Константин",
+  "Артем", "Максим", "Никита", "Илья", "Даниил", "Кирилл", "Тимур", "Егор",
+  "Иван", "Алексей", "Сергей", "Павел", "Роман", "Михаил", "Олег", "Глеб",
 ];
 
-const FAMILY_NAME_PARTS = {
-  powerful: ["Волков", "Соколов", "Орлов", "Громов", "Лебедев", "Козлов", "Шахов", "Разумов", "Баринов"],
-  official: ["Смирнов", "Петров", "Иванов", "Кузнецов", "Морозов", "Белов", "Крылов", "Титов"],
-  poor: ["Ершов", "Колесников", "Синицын", "Зуев", "Буров", "Савельев", "Фролов", "Устинов"],
-  mixed: ["Калинин", "Доронин", "Логинов", "Брагин", "Мельников", "Горшков", "Жуков", "Корнев"],
+const SURNAME_PARTS = {
+  official: ["Смирнов", "Петров", "Иванов", "Морозов", "Крылов", "Титов"],
+  powerful: ["Волков", "Соколов", "Орлов", "Громов", "Шахов", "Баринов"],
+  mixed: ["Калинин", "Доронин", "Логинов", "Брагин", "Корнев", "Жуков"],
+  poor: ["Ершов", "Колесников", "Синицын", "Зуев", "Фролов", "Устинов"],
+};
+
+const DISTRICTS = {
+  north: {
+    name: "Север",
+    style: "спальный район",
+    rent: [25000, 45000],
+    danger: 8,
+    jobs: ["courier", "service", "factory"],
+    leisure: "тихий район и бюджетные места",
+    marker: [110, 75],
+  },
+  university: {
+    name: "Университетский",
+    style: "студенческий кластер",
+    rent: [30000, 55000],
+    danger: 7,
+    jobs: ["study", "it-junior", "barista"],
+    leisure: "кампусы, библиотеки, коворкинги",
+    marker: [310, 75],
+  },
+  tech: {
+    name: "Технопарк",
+    style: "офисы и стартапы",
+    rent: [40000, 70000],
+    danger: 9,
+    jobs: ["it-junior", "it-middle", "product"],
+    leisure: "нетворкинг и профессиональные события",
+    marker: [510, 75],
+  },
+  west: {
+    name: "Запад",
+    style: "старый жилой фонд",
+    rent: [22000, 42000],
+    danger: 12,
+    jobs: ["service", "sales", "repair"],
+    leisure: "дворовые активности и локальные бары",
+    marker: [110, 210],
+  },
+  center: {
+    name: "Центр",
+    style: "дорого и престижно",
+    rent: [50000, 110000],
+    danger: 11,
+    jobs: ["sales", "product", "real-estate", "media"],
+    leisure: "клубы, рестораны, встречи",
+    marker: [310, 210],
+  },
+  east: {
+    name: "Восток",
+    style: "плотная коммерция",
+    rent: [30000, 60000],
+    danger: 14,
+    jobs: ["sales", "logistics", "repair"],
+    leisure: "рынки, ТЦ, трафик и суета",
+    marker: [510, 210],
+  },
+  industrial: {
+    name: "Промзона",
+    style: "склады и производство",
+    rent: [18000, 38000],
+    danger: 18,
+    jobs: ["factory", "logistics", "driver"],
+    leisure: "минимум развлечений",
+    marker: [110, 345],
+  },
+  suburb: {
+    name: "Пригород",
+    style: "домики и новостройки",
+    rent: [26000, 52000],
+    danger: 6,
+    jobs: ["driver", "service", "repair"],
+    leisure: "спорт и отдых на природе",
+    marker: [310, 345],
+  },
+  elite: {
+    name: "Элитный квартал",
+    style: "высокий чек и статус",
+    rent: [70000, 180000],
+    danger: 10,
+    jobs: ["real-estate", "media", "product"],
+    leisure: "дорогие заведения и закрытые мероприятия",
+    marker: [510, 345],
+  },
 };
 
 const FAMILY_ARCHETYPES = [
   {
-    key: "deputy",
-    title: "Семья регионального депутата",
+    title: "Семья регионального чиновника",
     suffix: "official",
-    story: "Публичная семья: любые скандалы бьют по репутации, но доступ к ресурсам выше среднего.",
-    startMoney: 220000,
-    education: 62,
-    stress: 38,
-    lawRisk: 6,
-    contacts: [
-      { type: "municipal", level: 45, note: "администрация района" },
-      { type: "lawyer", level: 52, note: "семейный юрист" },
-    ],
-    traitMods: { charisma: 8, discipline: 5, street: -8 },
-    pressure: 8,
+    story: "Публичная фамилия, постоянное давление репутации.",
+    startMoney: 190000,
+    debt: [0, 120000],
+    stats: { education: 63, stress: 34, discipline: 58, charisma: 56, street: 32 },
     legalShield: 16,
+    contacts: [{ type: "municipal", level: 52, note: "администрация" }],
   },
   {
-    key: "late-crime-boss",
-    title: "Семья бывшего криминального авторитета (отец умер)",
+    title: "Семья бывшего авторитета (отец умер)",
     suffix: "powerful",
-    story: "Остались связи и старые долги. Любой выбор в серую зону резко повышает риск.",
-    startMoney: 90000,
-    education: 38,
-    stress: 58,
-    lawRisk: 24,
-    contacts: [
-      { type: "street", level: 55, note: "старые знакомые отца" },
-      { type: "lawyer", level: 35, note: "адвокат по знакомству" },
-    ],
-    traitMods: { charisma: 3, discipline: -5, street: 14 },
-    pressure: 20,
+    story: "Остались долги и токсичные связи, вокруг много давления.",
+    startMoney: 70000,
+    debt: [80000, 320000],
+    stats: { education: 40, stress: 56, discipline: 39, charisma: 54, street: 66 },
     legalShield: 4,
+    contacts: [{ type: "street", level: 58, note: "люди прошлого" }],
   },
   {
-    key: "teacher",
     title: "Семья учителей",
     suffix: "mixed",
-    story: "Скромный быт, сильный упор на учебу и дисциплину.",
+    story: "Стабильность и дисциплина, но ограниченные ресурсы.",
     startMoney: 35000,
-    education: 70,
-    stress: 22,
-    lawRisk: 2,
-    contacts: [{ type: "education", level: 58, note: "директор школы" }],
-    traitMods: { charisma: 2, discipline: 10, street: -12 },
-    pressure: 4,
+    debt: [0, 90000],
+    stats: { education: 70, stress: 24, discipline: 64, charisma: 45, street: 26 },
     legalShield: 3,
+    contacts: [{ type: "education", level: 56, note: "школа" }],
   },
   {
-    key: "police-chief",
     title: "Семья офицера МВД",
     suffix: "official",
-    story: "Можно получать защиту в конфликтных ситуациях, но это портит общественную репутацию.",
-    startMoney: 120000,
-    education: 57,
-    stress: 32,
-    lawRisk: 5,
-    contacts: [
-      { type: "police", level: 65, note: "отец-офицер" },
-      { type: "lawyer", level: 40, note: "ведомственный адвокат" },
-    ],
-    traitMods: { charisma: 1, discipline: 9, street: -3 },
-    pressure: 7,
-    legalShield: 22,
+    story: "Есть защита, но шаг в сторону быстро бьет по образу.",
+    startMoney: 110000,
+    debt: [0, 150000],
+    stats: { education: 57, stress: 33, discipline: 61, charisma: 47, street: 34 },
+    legalShield: 20,
+    contacts: [{ type: "police", level: 64, note: "семейная линия" }],
   },
   {
-    key: "doctor",
-    title: "Семья врачей",
-    suffix: "mixed",
-    story: "Выше доступ к медицине и рекомендательным связям.",
-    startMoney: 80000,
-    education: 66,
-    stress: 25,
-    lawRisk: 2,
-    contacts: [{ type: "medicine", level: 64, note: "частная клиника" }],
-    traitMods: { charisma: 3, discipline: 8, street: -8 },
-    pressure: 10,
-    legalShield: 5,
-  },
-  {
-    key: "poor-rural",
     title: "Семья на грани бедности",
     suffix: "poor",
-    story: "Ресурсов мало, но мотивация выбраться в люди огромная.",
+    story: "Мало старта, много бытовых проблем и кредитов.",
     startMoney: 12000,
-    education: 34,
-    stress: 44,
-    lawRisk: 6,
-    contacts: [{ type: "neighbor", level: 30, note: "локальные подработки" }],
-    traitMods: { charisma: -2, discipline: 3, street: 8 },
-    pressure: 12,
+    debt: [50000, 280000],
+    stats: { education: 35, stress: 47, discipline: 43, charisma: 38, street: 49 },
     legalShield: 0,
+    contacts: [{ type: "neighbor", level: 28, note: "локальные знакомые" }],
   },
   {
-    key: "it-family",
+    title: "Семья предпринимателей среднего бизнеса",
+    suffix: "powerful",
+    story: "Деньги есть, но риск обрушения бизнеса всегда рядом.",
+    startMoney: 260000,
+    debt: [0, 260000],
+    stats: { education: 56, stress: 38, discipline: 53, charisma: 62, street: 41 },
+    legalShield: 10,
+    contacts: [{ type: "business", level: 60, note: "партнеры" }],
+  },
+  {
     title: "Семья айтишников",
     suffix: "mixed",
-    story: "Ранний доступ к технологиям и digital-навыкам.",
+    story: "Хорошая образовательная база и ранний доступ к технике.",
     startMoney: 130000,
-    education: 72,
-    stress: 26,
-    lawRisk: 3,
-    contacts: [{ type: "it", level: 62, note: "тех-комьюнити" }],
-    traitMods: { charisma: 0, discipline: 7, street: -7 },
-    pressure: 6,
-    legalShield: 4,
+    debt: [0, 100000],
+    stats: { education: 74, stress: 28, discipline: 57, charisma: 44, street: 24 },
+    legalShield: 5,
+    contacts: [{ type: "it", level: 62, note: "сообщество" }],
+  },
+];
+
+const EXTRA_FAMILY_STORIES = [
+  "семья таксистов", "семья дальнобойщика", "семья госслужащих", "семья владельца автомойки",
+  "семья после развода", "семья ипотечников", "семья строителей", "семья владельца кафе",
+  "семья следователя", "семья врача и продавца", "семья из военного гарнизона",
+  "семья инженеров", "семья с долгами по кредитам", "семья владельца хостела",
+  "семья работника аэропорта", "семья логистической компании", "семья риелторов",
+  "семья с мощной бабушкой-опорой", "семья с конфликтным бытом", "семья соцработника",
+  "семья собственника складов", "семья автомехаников", "семья пожарного",
+];
+
+const JOBS = {
+  study: {
+    key: "study",
+    title: "Учеба + подработка",
+    districtFit: ["university", "north"],
+    salary: [28000, 60000],
+    stress: 1,
+    education: 3,
+    req: { education: 20, reputation: 20 },
+    risk: 1,
+  },
+  courier: {
+    key: "courier",
+    title: "Курьер",
+    districtFit: ["north", "west", "east"],
+    salary: [45000, 90000],
+    stress: 2,
+    education: 0,
+    req: { discipline: 25, energy: 25 },
+    risk: 2,
+  },
+  barista: {
+    key: "barista",
+    title: "Бариста / сервис",
+    districtFit: ["center", "university"],
+    salary: [45000, 85000],
+    stress: 2,
+    education: 1,
+    req: { charisma: 35, reputation: 25 },
+    risk: 1,
+  },
+  service: {
+    key: "service",
+    title: "Сервисные услуги",
+    districtFit: ["west", "suburb", "north"],
+    salary: [55000, 120000],
+    stress: 2,
+    education: 0,
+    req: { discipline: 30, charisma: 25 },
+    risk: 2,
+  },
+  factory: {
+    key: "factory",
+    title: "Рабочий на производстве",
+    districtFit: ["industrial", "north"],
+    salary: [65000, 130000],
+    stress: 3,
+    education: 0,
+    req: { health: 40, discipline: 30 },
+    risk: 3,
+  },
+  logistics: {
+    key: "logistics",
+    title: "Логистика / диспетчер",
+    districtFit: ["industrial", "east", "center"],
+    salary: [70000, 150000],
+    stress: 3,
+    education: 1,
+    req: { education: 35, discipline: 35 },
+    risk: 2,
+  },
+  repair: {
+    key: "repair",
+    title: "Ремонт техники / авто",
+    districtFit: ["east", "west", "suburb"],
+    salary: [70000, 180000],
+    stress: 3,
+    education: 1,
+    req: { discipline: 40, street: 25 },
+    risk: 2,
+  },
+  driver: {
+    key: "driver",
+    title: "Водитель / развоз",
+    districtFit: ["suburb", "industrial"],
+    salary: [65000, 160000],
+    stress: 3,
+    education: 0,
+    req: { discipline: 35, energy: 35 },
+    risk: 3,
+  },
+  sales: {
+    key: "sales",
+    title: "Продажи",
+    districtFit: ["center", "east", "west"],
+    salary: [80000, 220000],
+    stress: 3,
+    education: 1,
+    req: { charisma: 45, reputation: 35 },
+    risk: 3,
+  },
+  media: {
+    key: "media",
+    title: "Контент / медиа",
+    districtFit: ["center", "elite"],
+    salary: [30000, 260000],
+    stress: 3,
+    education: 1,
+    req: { charisma: 45, discipline: 35 },
+    risk: 3,
+  },
+  "real-estate": {
+    key: "real-estate",
+    title: "Риелтор",
+    districtFit: ["center", "elite"],
+    salary: [90000, 320000],
+    stress: 4,
+    education: 1,
+    req: { charisma: 55, reputation: 45 },
+    risk: 3,
+  },
+  "it-junior": {
+    key: "it-junior",
+    title: "Junior IT",
+    districtFit: ["tech", "university"],
+    salary: [85000, 210000],
+    stress: 2,
+    education: 3,
+    req: { education: 55, discipline: 40 },
+    risk: 1,
+  },
+  "it-middle": {
+    key: "it-middle",
+    title: "Middle IT",
+    districtFit: ["tech"],
+    salary: [170000, 420000],
+    stress: 3,
+    education: 2,
+    req: { education: 70, discipline: 55, reputation: 45 },
+    risk: 1,
+  },
+  product: {
+    key: "product",
+    title: "Продукт / менеджмент",
+    districtFit: ["tech", "center", "elite"],
+    salary: [140000, 360000],
+    stress: 4,
+    education: 2,
+    req: { education: 60, charisma: 50, discipline: 45 },
+    risk: 2,
+  },
+};
+
+const HOUSING_MARKET = [
+  { id: "room-north", title: "Комната, Север", district: "north", rent: 22000, price: 3300000, quality: 38 },
+  { id: "studio-west", title: "Студия, Запад", district: "west", rent: 34000, price: 5200000, quality: 48 },
+  { id: "flat-east", title: "1к, Восток", district: "east", rent: 42000, price: 6900000, quality: 56 },
+  { id: "flat-university", title: "1к, Университетский", district: "university", rent: 45000, price: 7600000, quality: 62 },
+  { id: "flat-center", title: "1к, Центр", district: "center", rent: 70000, price: 11800000, quality: 72 },
+  { id: "house-suburb", title: "Дом, Пригород", district: "suburb", rent: 68000, price: 10600000, quality: 74 },
+  { id: "flat-elite", title: "Апартаменты, Элитный", district: "elite", rent: 130000, price: 24500000, quality: 88 },
+];
+
+const MAIN_STORY_CHAIN = [
+  {
+    stage: 1,
+    text: "Ты входишь во взрослую жизнь без права на ошибку. Нужен стабильный доход минимум 2 недели подряд.",
+    check: (p) => p.stabilityWeeks >= 2,
+    effect: (p) => { p.reputation = clamp(p.reputation + 2, 0, 100); },
   },
   {
-    key: "business",
-    title: "Семья предпринимателей",
-    suffix: "powerful",
-    story: "Есть стартовый капитал и бизнес-связи, но высокое давление семьи.",
-    startMoney: 300000,
-    education: 55,
-    stress: 34,
-    lawRisk: 8,
-    contacts: [
-      { type: "business", level: 68, note: "партнеры семьи" },
-      { type: "lawyer", level: 56, note: "корпоративный юрист" },
-    ],
-    traitMods: { charisma: 9, discipline: 5, street: 3 },
-    pressure: 12,
-    legalShield: 12,
+    stage: 2,
+    text: "К тебе присматриваются работодатели: нужна дисциплина и отсутствие жестких долговых просрочек.",
+    check: (p) => p.discipline >= 45 && p.debtLateWeeks < 4,
+    effect: (p) => { p.network = clamp(p.network + 3, 0, 100); },
+  },
+  {
+    stage: 3,
+    text: "Чтобы двигаться выше, нужно выйти на репутацию 45+ и иметь хотя бы один надежный контакт.",
+    check: (p) => p.reputation >= 45 && p.contacts.some((x) => x.level >= 45),
+    effect: (p) => { p.salaryBoost += 0.04; },
+  },
+  {
+    stage: 4,
+    text: "Порог взрослой ответственности: жилье должно быть не ниже качества 50 и без критических срывов по здоровью.",
+    check: (p) => p.housing.quality >= 50 && p.health >= 35,
+    effect: (p) => { p.stress = clamp(p.stress - 3, 0, 100); },
+  },
+  {
+    stage: 5,
+    text: "Выбор пути: либо карьерный рост (образование 65+), либо сильная предпринимательская репутация (55+).",
+    check: (p) => p.education >= 65 || p.reputation >= 55,
+    effect: (p) => { p.charisma = clamp(p.charisma + 2, 0, 100); },
+  },
+  {
+    stage: 6,
+    text: "Высокий уровень: удерживай риск ниже 35 на протяжении 8 недель.",
+    check: (p) => p.lowRiskStreak >= 8,
+    effect: (p) => { p.legalShield = clamp(p.legalShield + 4, 0, 100); },
+  },
+  {
+    stage: 7,
+    text: "Стабильная взрослая жизнь: активы + деньги должны превышать 12 млн.",
+    check: (p) => p.money + p.homeEquity >= 12000000,
+    effect: (p) => { p.storyCompleted = true; },
   },
 ];
 
-const ADDITIONAL_SCENARIOS = [
-  "семья таксистов", "семья дальнобойщика", "семья военного пенсионера", "семья бывшего спортсмена",
-  "семья менеджеров банка", "семья мигрантов-предпринимателей", "семья с долгами по кредитам", "семья владельцев автосервиса",
-  "семья охранника ТЦ", "семья нотариуса", "семья владельцев кафе", "семья госслужащих",
-  "семья артистов", "семья судьи в отставке", "семья программиста-фрилансера", "семья риелторов",
-  "семья работников завода", "семья из военного гарнизона", "семья фермеров", "семья с приемными детьми",
-  "семья стартаперов", "семья работников порта", "семья логистической компании", "семья с частыми переездами",
-  "семья с наследственным бизнесом", "семья предпринимателя-банкрота", "семья из криминального района", "семья владельца автомойки",
-  "семья юриста и бухгалтера", "семья где мать — врач, отец — водитель", "семья мелкого чиновника", "семья с религиозными традициями",
-  "семья кондитеров", "семья автомехаников", "семья охотников и рыболовов", "семья спортсменов",
-  "семья блогеров", "семья ипотечников", "семья владельца шиномонтажа", "семья без отца",
-  "семья без матери", "семья после развода", "семья военного медика", "семья полицейского патруля",
-  "семья владельца мини-отеля", "семья автомалярного цеха", "семья продавцов электроники", "семья работников МФЦ",
-  "семья с домом в пригороде", "семья со съемной квартирой", "семья студентов, ставших родителями рано", "семья с родственником в администрации",
-  "семья с родственником в суде", "семья автоюриста", "семья ветеринаров", "семья со строгими традициями",
-  "семья с финансовой подушкой", "семья в долговой яме", "семья с опытом эмиграции", "семья социального работника",
-  "семья репетиторов", "семья малого застройщика", "семья диджея и фотографа", "семья владельца хостела",
-  "семья инженеров", "семья работников аэропорта", "семья пожарного", "семья следователя",
-  "семья из деревни, переехавшая в город", "семья предпринимателя в e-commerce", "семья с хроническими болезнями", "семья с высоким статусом в городе",
-  "семья после потери бизнеса", "семья с радикальной экономией", "семья с несколькими квартирами", "семья судебного пристава",
-  "семья владельца ларьков", "семья фотографов свадеб", "семья из музыкальной школы", "семья дальних родственников-опекунов",
-  "семья с частыми конфликтами", "семья с сильной поддержкой бабушки", "семья без собственного жилья", "семья с успешным старшим братом",
-  "семья с судимостью у родственника", "семья с опытом госзакупок", "семья с культурным капиталом", "семья бывшего офицера ФСИН",
-  "семья строителей", "семья владельца ломбарда", "семья с опытом арбитражных судов", "семья топ-менеджера",
-  "семья охотника за скидками и кэшбэком", "семья с мощными семейными связями", "семья со скрытыми активами", "семья с обремененным наследством",
-  "семья с влиятельным крестным", "семья с постоянной нехваткой времени", "семья патологоанатома", "семья реставраторов авто",
-  "семья пригородных перевозчиков", "семья собственников складов", "семья мастера ногтевого сервиса", "семья владельца магазина автозапчастей",
+const PREHISTORY_EVENTS = [
+  { text: "В детстве приходилось рано помогать семье делом.", mods: { discipline: 3, stress: 2 } },
+  { text: "Были сильные школьные успехи.", mods: { education: 4, reputation: 1 } },
+  { text: "Частые конфликты дома.", mods: { stress: 4, mood: -3 } },
+  { text: "Спорт дал хорошую выносливость.", mods: { health: 5, discipline: 2 } },
+  { text: "Подростковая подработка укрепила самостоятельность.", mods: { money: 12000, discipline: 2 } },
+  { text: "Болезнь в семье оставила эмоциональный след.", mods: { stress: 3, mood: -2 } },
+  { text: "Переезд в новый район развил адаптацию.", mods: { charisma: 2, network: 2 } },
 ];
-
-const CAR_LIST = [
-  ["BMW M5 F90", 9800000, 22], ["BMW M5 F10", 4300000, 19], ["BMW M4 G82", 9300000, 21], ["BMW F30 320i", 2300000, 13],
-  ["Mercedes E63 AMG", 8700000, 20], ["Mercedes C63 AMG", 7600000, 19], ["Mercedes CLS 53", 6900000, 17], ["Mercedes G63", 16500000, 28],
-  ["Audi RS6 C8", 13200000, 24], ["Audi RS7", 10800000, 22], ["Audi S5", 5200000, 16], ["Porsche Panamera", 12300000, 24],
-  ["Porsche Cayenne", 9800000, 21], ["Toyota Camry 3.5", 3500000, 10], ["Toyota Land Cruiser 200", 7800000, 20], ["Lexus LX570", 8400000, 22],
-  ["Lexus ES250", 4600000, 12], ["Kia K5 GT Line", 2900000, 10], ["Hyundai Sonata", 2700000, 9], ["Volkswagen Passat B8", 2600000, 11],
-  ["Skoda Octavia RS", 3100000, 12], ["Tesla Model 3", 4200000, 8], ["Tesla Model Y", 5200000, 9], ["Nissan GT-R R35", 9700000, 23],
-  ["Infiniti Q50", 2800000, 13], ["Range Rover Sport", 9800000, 23], ["BMW X5 G05", 8800000, 19], ["BMW X6 G06", 9100000, 20],
-  ["Mercedes GLE Coupe", 8900000, 19], ["Audi Q8", 8600000, 18], ["Lada Vesta Sport", 1500000, 7], ["Lada Niva Travel", 1350000, 7],
-  ["Toyota Corolla", 2200000, 8], ["Honda Accord", 3000000, 10], ["Mazda 6", 2800000, 10], ["Subaru WRX", 3900000, 14],
-  ["Mitsubishi Pajero", 3400000, 12], ["Jeep Grand Cherokee", 5600000, 16], ["Chevrolet Tahoe", 7200000, 20], ["Cadillac Escalade", 12000000, 25],
-  ["Bentley Bentayga", 27000000, 34], ["BMW 530d G30", 5800000, 14], ["BMW 340i", 5200000, 15], ["Mercedes E200", 5000000, 13],
-  ["Audi A6 3.0", 6100000, 14], ["Genesis G80", 5500000, 13], ["Volvo S90", 4900000, 11], ["Jaguar XF", 4300000, 13],
-  ["Land Rover Defender", 9300000, 20], ["Toyota Supra A90", 7600000, 18], ["Ford Mustang GT", 6800000, 18], ["Dodge Challenger", 6400000, 19],
-  ["Nissan 370Z", 4200000, 15], ["Alfa Romeo Giulia", 5400000, 14], ["Kia Stinger", 3700000, 12], ["Volkswagen Tiguan", 3100000, 10],
-];
-
-const PLACES = [
-  { name: "Тренажерный зал", cost: 4500, health: 4, mood: 3, network: 1, risk: -1 },
-  { name: "Коворкинг", cost: 3500, health: 0, mood: 2, network: 4, risk: -1 },
-  { name: "Клуб", cost: 12000, health: -4, mood: 7, network: 2, risk: 4 },
-  { name: "Ресторан", cost: 9000, health: 1, mood: 6, network: 2, risk: 0 },
-  { name: "Кино", cost: 2200, health: 0, mood: 4, network: 1, risk: 0 },
-  { name: "Дом / отдых", cost: 0, health: 2, mood: 1, network: -1, risk: -2 },
-  { name: "Поездка за город", cost: 6000, health: 3, mood: 5, network: 0, risk: -1 },
-  { name: "Вечеринка у знакомых", cost: 8000, health: -2, mood: 5, network: 4, risk: 3 },
-  { name: "Образовательный курс", cost: 15000, health: 0, mood: 1, network: 3, risk: -2 },
-  { name: "Волонтерство", cost: 1000, health: 1, mood: 3, network: 3, risk: -2 },
-  { name: "Свидание в центре", cost: 7500, health: 0, mood: 7, network: 1, risk: 0 },
-  { name: "Загородный спа", cost: 18000, health: 5, mood: 6, network: 0, risk: -1 },
-];
-
-const SOCIAL_MOVES = [
-  { name: "Прокачивать дружбу с обычными знакомыми", contact: "street", gain: 3, rep: 1 },
-  { name: "Поддерживать связь с юристом", contact: "lawyer", gain: 2, rep: 0 },
-  { name: "Знакомиться с предпринимателями", contact: "business", gain: 3, rep: 1 },
-  { name: "Держать контакт с ДПС знакомым", contact: "dps", gain: 2, rep: -1 },
-  { name: "Укреплять связь с полицейским знакомым", contact: "police", gain: 2, rep: -1 },
-  { name: "Вкладываться в IT-комьюнити", contact: "it", gain: 4, rep: 1 },
-  { name: "Развивать связь с госструктурами", contact: "municipal", gain: 2, rep: 0 },
-  { name: "Ничего не делать в сети знакомств", contact: "none", gain: 0, rep: 0 },
-];
-
-const LEGAL_TEMPLATES = [
-  ["Учеба и легальная подработка", [25000, 65000], [8000, 25000], [0, 2], { education: 4, stress: 1, rep: 2, energy: -2 }],
-  ["Курьер / доставка", [50000, 120000], [9000, 30000], [1, 3], { education: 0, stress: 2, rep: 1, energy: -4 }],
-  ["Работа в автосервисе", [60000, 160000], [12000, 40000], [1, 4], { education: 1, stress: 2, rep: 1, energy: -3 }],
-  ["Продажи / маркетинг", [70000, 220000], [20000, 70000], [2, 4], { education: 1, stress: 3, rep: 2, energy: -3 }],
-  ["Стажировка в кибербезопасности", [90000, 280000], [15000, 60000], [0, 2], { education: 5, stress: 2, rep: 3, energy: -3 }],
-  ["Логистика / диспетчер", [65000, 180000], [14000, 45000], [1, 3], { education: 1, stress: 3, rep: 1, energy: -3 }],
-  ["Фриланс-дизайн", [40000, 210000], [10000, 50000], [1, 3], { education: 2, stress: 2, rep: 2, energy: -2 }],
-  ["Техподдержка", [55000, 140000], [9000, 28000], [0, 2], { education: 2, stress: 2, rep: 1, energy: -3 }],
-  ["Монтаж видео", [45000, 230000], [10000, 60000], [1, 3], { education: 1, stress: 3, rep: 2, energy: -2 }],
-  ["SMM-ведение проектов", [60000, 250000], [12000, 65000], [1, 4], { education: 1, stress: 3, rep: 2, energy: -2 }],
-  ["Открыть кофе-точку", [-90000, 380000], [60000, 230000], [3, 5], { education: 2, stress: 5, rep: 2, energy: -5 }],
-  ["Запуск e-commerce магазина", [-120000, 420000], [70000, 250000], [3, 5], { education: 2, stress: 5, rep: 2, energy: -5 }],
-  ["Риелторская практика", [70000, 350000], [25000, 90000], [2, 4], { education: 1, stress: 3, rep: 2, energy: -3 }],
-  ["Сервис детейлинга авто", [80000, 320000], [30000, 130000], [2, 4], { education: 1, stress: 3, rep: 2, energy: -3 }],
-  ["Ремонт техники", [55000, 210000], [14000, 50000], [1, 3], { education: 2, stress: 2, rep: 2, energy: -2 }],
-  ["Контент и стримы", [0, 400000], [10000, 90000], [1, 4], { education: 0, stress: 2, rep: 3, energy: -2 }],
-  ["Преподавание / репетиторство", [50000, 190000], [8000, 35000], [0, 2], { education: 3, stress: 2, rep: 3, energy: -2 }],
-  ["Работа в медиа", [45000, 180000], [10000, 45000], [1, 3], { education: 2, stress: 3, rep: 2, energy: -2 }],
-  ["Организация мероприятий", [60000, 300000], [25000, 110000], [2, 4], { education: 1, stress: 4, rep: 3, energy: -4 }],
-  ["Строительный подряд", [90000, 350000], [35000, 150000], [2, 4], { education: 1, stress: 4, rep: 2, energy: -5 }],
-];
-
-const GREY_TEMPLATES = [
-  ["Агрессивный арбитраж трафика", [-120000, 450000], [40000, 200000], [5, 10], { education: 1, stress: 5, rep: -1, energy: -3 }],
-  ["Высокорисковый трейдинг", [-350000, 500000], [15000, 70000], [4, 9], { education: 1, stress: 4, rep: -1, energy: -2 }],
-  ["Серый посреднический ресейл", [-80000, 320000], [30000, 150000], [4, 8], { education: 0, stress: 4, rep: -1, energy: -3 }],
-  ["Перепродажа дефицитных товаров", [-70000, 280000], [25000, 120000], [3, 7], { education: 0, stress: 3, rep: 0, energy: -3 }],
-  ["Опасный микрокредитный бизнес", [-100000, 420000], [30000, 170000], [6, 11], { education: 0, stress: 6, rep: -2, energy: -4 }],
-  ["Серый консалтинг", [30000, 260000], [10000, 90000], [3, 6], { education: 1, stress: 3, rep: -1, energy: -2 }],
-  ["Сомнительные рекламные интеграции", [20000, 300000], [10000, 100000], [4, 8], { education: 0, stress: 3, rep: -2, energy: -2 }],
-  ["Теневой cash-flow посредник", [90000, 430000], [30000, 180000], [6, 12], { education: -1, stress: 6, rep: -3, energy: -4 }],
-];
-
-const ILLEGAL_TEMPLATES = [
-  ["Серая P2P-схема (высокий риск)", [130000, 650000], [50000, 240000], [18, 40], { education: -1, stress: 8, rep: -6, energy: -5 }],
-  ["Мошенническая онлайн-схема (крайний риск)", [180000, 900000], [90000, 420000], [25, 55], { education: -2, stress: 11, rep: -10, energy: -6 }],
-  ["Поддельные сервисные услуги", [90000, 520000], [35000, 180000], [16, 38], { education: -1, stress: 8, rep: -6, energy: -4 }],
-  ["Обман с цифровыми подарками", [80000, 460000], [25000, 150000], [15, 35], { education: -1, stress: 7, rep: -6, energy: -4 }],
-  ["Фальшивые гарантийные сделки", [100000, 600000], [40000, 230000], [18, 42], { education: -1, stress: 8, rep: -7, energy: -5 }],
-  ["Серая работа через подставных лиц", [110000, 580000], [50000, 220000], [18, 43], { education: -1, stress: 8, rep: -7, energy: -5 }],
-];
-
-function buildActivities() {
-  const out = [];
-  let idx = 0;
-  LEGAL_TEMPLATES.forEach((t) => {
-    out.push({
-      key: `legal-${idx++}`,
-      name: t[0],
-      legality: "legal",
-      income: t[1],
-      expense: t[2],
-      risk: t[3],
-      stats: t[4],
-      details: "Легальная траектория: стабильнее, но обычно медленнее разгон по доходу.",
-    });
-  });
-  GREY_TEMPLATES.forEach((t) => {
-    out.push({
-      key: `grey-${idx++}`,
-      name: t[0],
-      legality: "grey",
-      income: t[1],
-      expense: t[2],
-      risk: t[3],
-      stats: t[4],
-      details: "Серая зона: доход может быть выше, но риски и нестабильность резко возрастают.",
-    });
-  });
-  ILLEGAL_TEMPLATES.forEach((t) => {
-    out.push({
-      key: `illegal-${idx++}`,
-      name: t[0],
-      legality: "illegal",
-      income: t[1],
-      expense: t[2],
-      risk: t[3],
-      stats: t[4],
-      details: "Нелегальная деятельность приводит к высокой вероятности уголовных последствий.",
-    });
-  });
-  const copies = [];
-  for (let i = 0; i < 3; i += 1) {
-    out.forEach((a) => {
-      copies.push({
-        ...a,
-        key: `${a.key}-v${i}`,
-        name: `${a.name} / сценарий ${i + 1}`,
-        income: [a.income[0] + rand(-20000, 30000), a.income[1] + rand(-30000, 40000)],
-        expense: [Math.max(0, a.expense[0] + rand(-10000, 12000)), a.expense[1] + rand(-10000, 20000)],
-        risk: [Math.max(0, a.risk[0] + rand(-2, 2)), Math.max(a.risk[1], a.risk[1] + rand(-2, 4))],
-      });
-    });
-  }
-  return [...out, ...copies];
-}
-
-const ACTIVITIES = buildActivities();
 
 const LEGAL_CHARGES = [
   { article: "Ст. 159 УК РФ (мошенничество)", min: 24, max: 84, confiscationChance: 78 },
   { article: "Ст. 187 УК РФ (неправомерный оборот средств платежей)", min: 18, max: 72, confiscationChance: 62 },
   { article: "Ст. 174.1 УК РФ (легализация преступных доходов)", min: 20, max: 96, confiscationChance: 82 },
-  { article: "Ст. 272 УК РФ (неправомерный доступ к компьютерной информации)", min: 12, max: 48, confiscationChance: 40 },
-  { article: "Ст. 291 УК РФ (дача взятки)", min: 12, max: 60, confiscationChance: 55 },
-];
-
-const RELATION_EVENTS = [
-  "Вы познакомились с интересным человеком в кофейне.",
-  "Появилась симпатия через общих друзей.",
-  "Свидание прошло отлично, отношения укрепились.",
-  "Ссора из-за нехватки времени снизила близость.",
-  "Совместная поездка добавила доверия.",
-  "Ревность и слухи ударили по отношениям.",
-];
-
-const PREHISTORY_EVENTS = [
-  { text: "Семья вложилась в кружки и развитие.", mods: { education: 4, discipline: 3, stress: -1 }, type: "good" },
-  { text: "В детстве были частые переезды и стресс.", mods: { stress: 4, mood: -3, networkValue: -2 }, type: "bad" },
-  { text: "Появился наставник, который помог с самооценкой.", mods: { charisma: 3, discipline: 2 }, type: "good" },
-  { text: "Подростковый конфликт с семьей испортил отношения дома.", mods: { stress: 3, mood: -4 }, type: "bad" },
-  { text: "Регулярный спорт укрепил здоровье.", mods: { health: 6, discipline: 2 }, type: "good" },
-  { text: "Ранняя подработка дала опыт ответственности.", mods: { money: 15000, discipline: 2, networkValue: 2 }, type: "good" },
-  { text: "Была травма и длительное восстановление.", mods: { health: -8, stress: 4 }, type: "bad" },
+  { article: "Ст. 272 УК РФ (неправомерный доступ к информации)", min: 12, max: 48, confiscationChance: 40 },
 ];
 
 const state = {
@@ -352,83 +402,80 @@ const state = {
   history: [],
   activeCase: null,
   inPrison: false,
-  prisonMonthsLeft: 0,
+  prisonWeeksLeft: 0,
+  selectedDistrict: null,
 };
 
 const el = {
   setupScreen: document.getElementById("setupScreen"),
   gameScreen: document.getElementById("gameScreen"),
   firstNameInput: document.getElementById("firstNameInput"),
-  citySelect: document.getElementById("citySelect"),
-  familySelect: document.getElementById("familySelect"),
+  difficultySelect: document.getElementById("difficultySelect"),
   familyPreview: document.getElementById("familyPreview"),
   startBtn: document.getElementById("startBtn"),
   profileBlock: document.getElementById("profileBlock"),
   statsBlock: document.getElementById("statsBlock"),
+  jobBlock: document.getElementById("jobBlock"),
+  housingBlock: document.getElementById("housingBlock"),
   contactsBlock: document.getElementById("contactsBlock"),
-  relationBlock: document.getElementById("relationBlock"),
-  scenarioCount: document.getElementById("scenarioCount"),
-  activitySelect: document.getElementById("activitySelect"),
-  activityInfo: document.getElementById("activityInfo"),
-  placeSelect: document.getElementById("placeSelect"),
-  networkSelect: document.getElementById("networkSelect"),
-  advanceBtn: document.getElementById("advanceBtn"),
-  securityBtn: document.getElementById("securityBtn"),
-  familyHelpBtn: document.getElementById("familyHelpBtn"),
+  districtInfo: document.getElementById("districtInfo"),
+  cityMap: document.getElementById("cityMap"),
+  playerMarker: document.getElementById("playerMarker"),
+  travelBtn: document.getElementById("travelBtn"),
+  nextWeekBtn: document.getElementById("nextWeekBtn"),
   casePanel: document.getElementById("casePanel"),
+  timeBlock: document.getElementById("timeBlock"),
+  actionsList: document.getElementById("actionsList"),
+  housingMarketSelect: document.getElementById("housingMarketSelect"),
+  rentBtn: document.getElementById("rentBtn"),
+  mortgageBtn: document.getElementById("mortgageBtn"),
+  housingInfo: document.getElementById("housingInfo"),
   timeline: document.getElementById("timeline"),
-  carMarketSelect: document.getElementById("carMarketSelect"),
-  ownedCarsSelect: document.getElementById("ownedCarsSelect"),
-  buyCarBtn: document.getElementById("buyCarBtn"),
-  sellCarBtn: document.getElementById("sellCarBtn"),
-  carInfo: document.getElementById("carInfo"),
 };
-
-function generateFamilyScenarios() {
-  const list = [...FAMILY_ARCHETYPES];
-  for (let i = 0; i < ADDITIONAL_SCENARIOS.length; i += 1) {
-    const base = pick(FAMILY_ARCHETYPES);
-    const title = ADDITIONAL_SCENARIOS[i];
-    list.push({
-      ...base,
-      key: `generated-${i}`,
-      title: title[0].toUpperCase() + title.slice(1),
-      story: `Вариация: ${title}. База: ${base.title.toLowerCase()}.`,
-      startMoney: Math.max(5000, base.startMoney + rand(-40000, 50000)),
-      education: clamp(base.education + rand(-12, 12), 15, 90),
-      stress: clamp(base.stress + rand(-12, 12), 10, 80),
-      lawRisk: clamp(base.lawRisk + rand(-4, 8), 0, 45),
-      traitMods: {
-        charisma: base.traitMods.charisma + rand(-4, 4),
-        discipline: base.traitMods.discipline + rand(-4, 4),
-        street: base.traitMods.street + rand(-5, 5),
-      },
-      pressure: clamp(base.pressure + rand(-6, 8), 0, 28),
-      legalShield: clamp(base.legalShield + rand(-10, 10), 0, 30),
-      suffix: pick(["powerful", "official", "poor", "mixed"]),
-    });
-  }
-  return list;
-}
-
-const ALL_FAMILIES = generateFamilyScenarios();
-
-function generateSurname(family) {
-  return pick(FAMILY_NAME_PARTS[family.suffix] || FAMILY_NAME_PARTS.mixed);
-}
 
 function formatMoney(num) {
   return `${Math.round(num).toLocaleString("ru-RU")} ₽`;
 }
 
-function addHistoryAt(stamp, text, type = "neutral") {
+function addHistory(text, type = "info") {
+  const p = state.player;
+  const stamp = `${p.ageYears} лет, нед ${p.weekOfYear}`;
   state.history.unshift({ stamp, text, type });
   renderTimeline();
 }
 
-function addHistory(text, type = "neutral") {
-  const stamp = `${state.player.ageYears} г ${state.player.ageMonths} мес`;
-  addHistoryAt(stamp, text, type);
+function addHistoryAt(stamp, text, type = "info") {
+  state.history.unshift({ stamp, text, type });
+}
+
+function generateFamilies() {
+  const full = [...FAMILY_ARCHETYPES];
+  EXTRA_FAMILY_STORIES.forEach((story, i) => {
+    const base = pick(FAMILY_ARCHETYPES);
+    full.push({
+      ...base,
+      title: story[0].toUpperCase() + story.slice(1),
+      story: `Вариант старта: ${story}. Базовая модель — ${base.title.toLowerCase()}.`,
+      startMoney: Math.max(7000, base.startMoney + rand(-30000, 50000)),
+      debt: [Math.max(0, base.debt[0] + rand(-20000, 20000)), base.debt[1] + rand(0, 80000)],
+      stats: {
+        education: clamp(base.stats.education + rand(-10, 10), 20, 90),
+        stress: clamp(base.stats.stress + rand(-8, 12), 12, 80),
+        discipline: clamp(base.stats.discipline + rand(-10, 8), 20, 85),
+        charisma: clamp(base.stats.charisma + rand(-8, 8), 20, 90),
+        street: clamp(base.stats.street + rand(-8, 8), 10, 85),
+      },
+      legalShield: clamp(base.legalShield + rand(-6, 6), 0, 30),
+      key: `generated-family-${i}`,
+    });
+  });
+  return full;
+}
+
+const ALL_FAMILIES = generateFamilies();
+
+function generateSurname(family) {
+  return pick(SURNAME_PARTS[family.suffix] || SURNAME_PARTS.mixed);
 }
 
 function getContactLevel(type) {
@@ -436,530 +483,613 @@ function getContactLevel(type) {
   return c ? c.level : 0;
 }
 
-function upsertContact(type, delta, note = "") {
-  if (type === "none") return;
-  const existing = state.player.contacts.find((x) => x.type === type);
-  if (existing) {
-    existing.level = clamp(existing.level + delta, 0, 100);
-    if (note) existing.note = note;
-  } else {
-    state.player.contacts.push({ type, level: clamp(delta, 0, 100), note });
+function upsertContact(type, delta, note) {
+  const target = state.player.contacts.find((x) => x.type === type);
+  if (target) {
+    target.level = clamp(target.level + delta, 0, 100);
+    if (note) target.note = note;
+    return;
   }
-}
-
-function careerScore() {
-  const p = state.player;
-  return (
-    p.education * 1.4 +
-    p.reputation * 1.2 +
-    p.charisma * 1.1 +
-    p.discipline * 1.1 +
-    p.networkValue * 1.5 +
-    p.street * 0.4 +
-    p.assetsValue / 300000
-  );
-}
-
-function estimateScenarioCount() {
-  return ACTIVITIES.length * PLACES.length * SOCIAL_MOVES.length * ALL_FAMILIES.length * (CAR_LIST.length + 1);
+  state.player.contacts.push({ type, level: clamp(delta, 0, 100), note: note || "" });
 }
 
 function initSetup() {
-  CITIES.forEach((city) => {
-    const o = document.createElement("option");
-    o.value = city;
-    o.textContent = city;
-    el.citySelect.appendChild(o);
-  });
-  el.citySelect.value = pick(CITIES);
-
-  ALL_FAMILIES.forEach((f) => {
-    const o = document.createElement("option");
-    o.value = f.key;
-    o.textContent = f.title;
-    el.familySelect.appendChild(o);
-  });
-  el.familySelect.selectedIndex = rand(0, ALL_FAMILIES.length - 1);
   el.firstNameInput.value = pick(MALE_NAMES);
-
-  el.familySelect.addEventListener("change", renderFamilyPreview);
+  el.familyPreview.textContent = "Семья и район старта будут сгенерированы случайно.";
   el.startBtn.addEventListener("click", startGame);
-  renderFamilyPreview();
 }
 
-function renderFamilyPreview() {
-  const family = ALL_FAMILIES.find((f) => f.key === el.familySelect.value);
-  if (!family) return;
-  const surname = generateSurname(family);
-  const name = el.firstNameInput.value.trim() || "Игрок";
-  el.familyPreview.innerHTML = `
-    <strong>${name} ${surname}</strong><br />
-    ${family.story}<br />
-    Старт: ${formatMoney(family.startMoney)} • Образование: ${family.education} • Базовый правовой риск семьи: ${family.lawRisk}%
-  `;
-}
-
-function generatePrehistory() {
+function applyPrehistory() {
   const p = state.player;
-  for (let age = 0; age <= 15; age += 1) {
-    if (rand(1, 100) <= 34) {
+  for (let age = 0; age < 16; age += 1) {
+    if (rand(1, 100) <= 36) {
       const ev = pick(PREHISTORY_EVENTS);
       Object.entries(ev.mods).forEach(([k, v]) => {
-        if (typeof p[k] === "number") p[k] = clamp(p[k] + v, k === "money" ? -1000000 : 0, 10000000);
+        if (typeof p[k] === "number") {
+          p[k] = clamp(p[k] + v, k === "money" ? -999999 : 0, 100000000);
+        }
       });
-      addHistoryAt(`${age} лет`, ev.text, ev.type);
+      addHistoryAt(`${age} лет`, ev.text, vToType(ev.mods));
     }
   }
 }
 
+function vToType(mods) {
+  const sum = Object.values(mods).reduce((acc, v) => acc + v, 0);
+  if (sum > 0) return "good";
+  if (sum < 0) return "bad";
+  return "info";
+}
+
 function startGame() {
-  const family = ALL_FAMILIES.find((f) => f.key === el.familySelect.value);
-  if (!family) return;
+  const family = pick(ALL_FAMILIES);
   const firstName = (el.firstNameInput.value.trim() || pick(MALE_NAMES)).slice(0, 24);
   const surname = generateSurname(family);
+  const districtKey = pick(Object.keys(DISTRICTS));
+  const housing = pick(HOUSING_MARKET.filter((h) => h.district === districtKey));
+  const hard = el.difficultySelect.value === "hard";
 
   state.player = {
     firstName,
     surname,
-    city: el.citySelect.value,
+    difficulty: hard ? "hard" : "normal",
     ageYears: 16,
-    ageMonths: 0,
-    money: family.startMoney,
-    debt: Math.max(0, rand(-50000, 250000)),
-    health: clamp(78 + rand(-12, 8), 20, 100),
-    energy: clamp(80 + rand(-12, 8), 20, 100),
-    mood: clamp(68 + rand(-15, 10), 15, 100),
-    stress: family.stress,
-    education: family.education,
-    reputation: clamp(50 + rand(-10, 10), 5, 95),
-    networkValue: clamp(35 + rand(-8, 10), 0, 100),
-    riskHeat: family.lawRisk,
-    legalShield: family.legalShield,
-    familyPressure: family.pressure,
-    charisma: clamp(45 + family.traitMods.charisma + rand(-5, 8), 5, 95),
-    discipline: clamp(45 + family.traitMods.discipline + rand(-6, 8), 5, 95),
-    street: clamp(40 + family.traitMods.street + rand(-8, 8), 0, 100),
-    relation: { status: "нет отношений", trust: 0 },
-    contacts: family.contacts.map((c) => ({ ...c })),
+    weekOfYear: 1,
+    totalWeeks: 0,
     familyTitle: family.title,
-    assets: [],
-    prisonRecord: 0,
+    familyStory: family.story,
+    district: districtKey,
+    selectedDistrict: districtKey,
+    money: family.startMoney,
+    debt: rand(family.debt[0], family.debt[1]),
+    debtLateWeeks: 0,
+    health: clamp(76 + rand(-8, 8), 20, 100),
+    energy: clamp(74 + rand(-8, 10), 20, 100),
+    mood: clamp(62 + rand(-10, 10), 20, 100),
+    stress: family.stats.stress + (hard ? 6 : 0),
+    education: family.stats.education,
+    reputation: clamp(45 + rand(-8, 8), 10, 90),
+    network: clamp(34 + rand(-6, 8), 0, 100),
+    riskHeat: clamp(8 + rand(-2, 8), 0, 100),
+    legalShield: family.legalShield,
+    charisma: family.stats.charisma,
+    discipline: family.stats.discipline,
+    street: family.stats.street,
+    contacts: family.contacts.map((c) => ({ ...c })),
+    currentJobKey: null,
+    salaryBoost: 0,
+    stabilityWeeks: 0,
+    lowRiskStreak: 0,
+    homeEquity: 0,
+    housing: {
+      mode: "rent",
+      itemId: housing.id,
+      district: housing.district,
+      quality: housing.quality,
+      weeklyRent: Math.round(housing.rent / 4.33),
+      mortgageWeekly: 0,
+      mortgageLeft: 0,
+      mortgageTotal: 0,
+    },
+    storyStage: 1,
+    storyCompleted: false,
     isAlive: true,
+    prisonRecord: 0,
   };
 
   state.history = [];
   state.activeCase = null;
   state.inPrison = false;
-  state.prisonMonthsLeft = 0;
+  state.prisonWeeksLeft = 0;
+  state.selectedDistrict = districtKey;
 
-  generatePrehistory();
-  addHistory("К 16 годам стартовая история сформирована. Начинается самостоятельная жизнь.", "good");
-  addHistory(`Текущая фамилия по семье: ${state.player.firstName} ${state.player.surname}.`, "neutral");
-  if (state.player.debt > 0) addHistory(`Есть стартовый долг: ${formatMoney(state.player.debt)}.`, "bad");
+  applyPrehistory();
+  addHistory(`Случайная семья: ${family.title}.`, "info");
+  addHistory(`Стартовый район: ${DISTRICTS[districtKey].name}.`, "info");
+  addHistory("Ты не выбирал стартовые условия — придется адаптироваться.", "bad");
 
-  populateSelectors();
+  if (state.player.debt > 0) {
+    addHistory(`Стартовый долг: ${formatMoney(state.player.debt)}.`, "bad");
+  }
+
+  populateHousingMarket();
+  initMap();
+  bindGameActions();
   el.setupScreen.classList.add("hidden");
   el.gameScreen.classList.remove("hidden");
-  bindGameActions();
   renderAll();
-}
-
-function populateSelectors() {
-  el.activitySelect.innerHTML = "";
-  ACTIVITIES.forEach((a) => {
-    const o = document.createElement("option");
-    o.value = a.key;
-    o.textContent = `${a.name} [${a.legality}]`;
-    el.activitySelect.appendChild(o);
-  });
-  el.activitySelect.selectedIndex = 0;
-
-  el.placeSelect.innerHTML = "";
-  PLACES.forEach((p) => {
-    const o = document.createElement("option");
-    o.value = p.name;
-    o.textContent = `${p.name} (${formatMoney(p.cost)})`;
-    el.placeSelect.appendChild(o);
-  });
-
-  el.networkSelect.innerHTML = "";
-  SOCIAL_MOVES.forEach((m) => {
-    const o = document.createElement("option");
-    o.value = m.name;
-    o.textContent = m.name;
-    el.networkSelect.appendChild(o);
-  });
-
-  el.carMarketSelect.innerHTML = "";
-  CAR_LIST.forEach(([model, price]) => {
-    const o = document.createElement("option");
-    o.value = model;
-    o.textContent = `${model} — ${formatMoney(price)}`;
-    el.carMarketSelect.appendChild(o);
-  });
-
-  refreshOwnedCars();
-  renderActivityInfo();
 }
 
 function bindGameActions() {
   if (state.initialized) return;
   state.initialized = true;
-  el.advanceBtn.addEventListener("click", playMonth);
-  el.securityBtn.addEventListener("click", buySecurity);
-  el.familyHelpBtn.addEventListener("click", familyHelp);
-  el.buyCarBtn.addEventListener("click", buyCar);
-  el.sellCarBtn.addEventListener("click", sellCar);
-  el.ownedCarsSelect.addEventListener("change", renderCarInfo);
-  el.activitySelect.addEventListener("change", renderActivityInfo);
+  el.travelBtn.addEventListener("click", travelToDistrict);
+  el.nextWeekBtn.addEventListener("click", nextWeek);
+  el.rentBtn.addEventListener("click", rentHousing);
+  el.mortgageBtn.addEventListener("click", mortgageHousing);
 }
 
-function renderActivityInfo() {
-  const activity = ACTIVITIES.find((a) => a.key === el.activitySelect.value) || ACTIVITIES[0];
-  if (!activity || !el.activityInfo) return;
-  const legalLabel = activity.legality === "legal" ? "Легально" : activity.legality === "grey" ? "Серая зона" : "Нелегально";
-  el.activityInfo.textContent =
-    `${legalLabel} • Доход: ${formatMoney(activity.income[0])}...${formatMoney(activity.income[1])} • ` +
-    `Расход: ${formatMoney(activity.expense[0])}...${formatMoney(activity.expense[1])} • ` +
-    `Риск: ${activity.risk[0]}-${activity.risk[1]} • ${activity.details}`;
+function initMap() {
+  const rects = Array.from(el.cityMap.querySelectorAll("rect[data-district]"));
+  rects.forEach((rect) => {
+    rect.addEventListener("click", () => {
+      state.selectedDistrict = rect.dataset.district;
+      updateMapStyles();
+      renderDistrictInfo();
+      renderActions();
+    });
+  });
+  updateMapStyles();
+  renderDistrictInfo();
+  moveMarkerTo(state.player.district);
 }
 
-function buySecurity() {
-  if (state.player.money < 5000) {
-    addHistory("Не хватило денег на усиление личной безопасности.", "bad");
-    renderAll();
-    return;
-  }
-  state.player.money -= 5000;
-  state.player.riskHeat = clamp(state.player.riskHeat - rand(1, 4), 0, 100);
-  state.player.legalShield = clamp(state.player.legalShield + rand(1, 3), 0, 100);
-  addHistory("Потрачено на цифровую и юридическую гигиену. Риски снижены.", "good");
-  renderAll();
+function updateMapStyles() {
+  const rects = Array.from(el.cityMap.querySelectorAll("rect[data-district]"));
+  rects.forEach((rect) => {
+    rect.classList.remove("selected", "current");
+    if (rect.dataset.district === state.selectedDistrict) rect.classList.add("selected");
+    if (rect.dataset.district === state.player.district) rect.classList.add("current");
+  });
 }
 
-function familyHelp() {
+function moveMarkerTo(districtKey) {
+  const district = DISTRICTS[districtKey];
+  if (!district) return;
+  const [x, y] = district.marker;
+  el.playerMarker.style.left = `${(x / 620) * 100}%`;
+  el.playerMarker.style.top = `${(y / 420) * 100}%`;
+}
+
+function renderDistrictInfo() {
+  const d = DISTRICTS[state.selectedDistrict];
+  if (!d) return;
+  el.districtInfo.innerHTML = `
+    <strong>${d.name}</strong> — ${d.style}<br/>
+    Риски района: ${d.danger}/100 • Аренда: ${formatMoney(d.rent[0])} - ${formatMoney(d.rent[1])}<br/>
+    ${d.leisure}
+  `;
+}
+
+function travelToDistrict() {
   const p = state.player;
-  const influence = p.legalShield + getContactLevel("police") + getContactLevel("municipal") + getContactLevel("dps");
-  const cost = rand(30000, 180000);
+  if (state.inPrison || !p.isAlive) return;
+  if (!state.selectedDistrict || state.selectedDistrict === p.district) return;
+  const baseCost = rand(300, 1600);
+  const longTripPenalty = DISTRICTS[state.selectedDistrict].danger > 14 ? 1.3 : 1;
+  const cost = Math.round(baseCost * longTripPenalty);
   if (p.money < cost) {
-    addHistory("Семейный ресурс есть, но не хватило денег на решение вопроса.", "bad");
-    renderAll();
+    addHistory("Не хватило денег на перемещение.", "bad");
     return;
   }
   p.money -= cost;
-  p.reputation = clamp(p.reputation - rand(4, 10), 0, 100);
-
-  if (state.activeCase) {
-    const chance = clamp(20 + influence * 0.7 - state.activeCase.severity * 0.45, 5, 85);
-    if (rand(1, 100) <= chance) {
-      addHistory(`Семья помогла смягчить дело за ${formatMoney(cost)}. Но репутация просела.`, "neutral");
-      state.activeCase = null;
-      p.riskHeat = clamp(p.riskHeat - 15, 0, 100);
-    } else {
-      addHistory(`Попытка семейного влияния за ${formatMoney(cost)} провалилась и вызвала лишнее внимание.`, "bad");
-      p.riskHeat = clamp(p.riskHeat + 8, 0, 100);
-    }
-  } else {
-    p.riskHeat = clamp(p.riskHeat - rand(3, 10), 0, 100);
-    addHistory(`Семья закрыла мелкие вопросы за ${formatMoney(cost)}. Репутация немного пострадала.`, "neutral");
-  }
+  p.energy = clamp(p.energy - rand(3, 8), 0, 100);
+  p.district = state.selectedDistrict;
+  moveMarkerTo(p.district);
+  updateMapStyles();
+  renderDistrictInfo();
+  renderActions();
+  addHistory(`Перемещение в район: ${DISTRICTS[p.district].name}. Потрачено ${formatMoney(cost)}.`, "info");
   renderAll();
 }
 
-function buyCar() {
-  const info = CAR_LIST.find((x) => x[0] === el.carMarketSelect.value);
-  if (!info) return;
-  const [name, price, monthlyCost] = info;
-  if (state.player.money < price) {
-    addHistory(`Не хватило денег на ${name}.`, "bad");
-    renderAll();
-    return;
-  }
-  state.player.money -= price;
-  state.player.assets.push({ model: name, buyPrice: price, monthlyCost, condition: rand(70, 98) });
-  state.player.reputation = clamp(state.player.reputation + rand(0, 3), 0, 100);
-  addHistory(`Куплен автомобиль ${name} за ${formatMoney(price)}.`, "good");
-  refreshOwnedCars();
-  renderAll();
+function availableJobsForDistrict(key) {
+  const district = DISTRICTS[key];
+  if (!district) return [];
+  return district.jobs
+    .map((jobKey) => JOBS[jobKey])
+    .filter(Boolean);
 }
 
-function sellCar() {
-  const idx = Number(el.ownedCarsSelect.value);
-  if (Number.isNaN(idx) || !state.player.assets[idx]) return;
-  const car = state.player.assets[idx];
-  const sellPrice = Math.max(150000, Math.round(car.buyPrice * (car.condition / 100) * rand(72, 86) / 100));
-  state.player.money += sellPrice;
-  state.player.assets.splice(idx, 1);
-  addHistory(`Продан ${car.model} за ${formatMoney(sellPrice)}.`, "neutral");
-  refreshOwnedCars();
-  renderAll();
+function checkReq(job, p) {
+  const req = job.req || {};
+  const pairs = Object.entries(req);
+  return pairs.every(([k, v]) => (p[k] || 0) >= v);
 }
 
-function refreshOwnedCars() {
-  el.ownedCarsSelect.innerHTML = "";
-  state.player?.assets?.forEach((car, idx) => {
-    const o = document.createElement("option");
-    o.value = String(idx);
-    o.textContent = `${car.model} (${car.condition}%)`;
-    el.ownedCarsSelect.appendChild(o);
+function buildActionCards() {
+  const p = state.player;
+  const jobs = availableJobsForDistrict(state.selectedDistrict);
+  const cards = [];
+
+  jobs.forEach((job) => {
+    const pass = checkReq(job, p);
+    const reqLine = Object.entries(job.req || {})
+      .map(([k, v]) => `${k} ${v}+`)
+      .join(", ");
+    cards.push({
+      key: `job-${job.key}`,
+      title: job.title,
+      meta: `${pass ? "Доступно" : "Недоступно"} • Доход/нед: ${formatMoney(job.salary[0] / 4.33)} - ${formatMoney(job.salary[1] / 4.33)} • Требования: ${reqLine}`,
+      disabled: !pass,
+      action: () => {
+        p.currentJobKey = job.key;
+        addHistory(`Ты закрепился в сфере: ${job.title}.`, "good");
+        renderAll();
+      },
+    });
   });
-  renderCarInfo();
+
+  cards.push({
+    key: "act-study",
+    title: "Самообучение (вечером)",
+    meta: "Цена: 2 000 - 8 000 ₽ • +образование • -энергия",
+    disabled: false,
+    action: () => {
+      const cost = rand(2000, 8000);
+      if (p.money < cost) {
+        addHistory("Не хватило денег на обучение.", "bad");
+        return;
+      }
+      p.money -= cost;
+      p.education = clamp(p.education + rand(1, 3), 0, 100);
+      p.energy = clamp(p.energy - rand(3, 7), 0, 100);
+      p.discipline = clamp(p.discipline + 1, 0, 100);
+      addHistory(`Самообучение завершено. Минус ${formatMoney(cost)}.`, "good");
+      renderAll();
+    },
+  });
+
+  cards.push({
+    key: "act-social",
+    title: "Социальный выход",
+    meta: "Цена: 1 000 - 15 000 ₽ • шанс на контакт • влияние на настроение/репутацию",
+    disabled: false,
+    action: () => {
+      const cost = rand(1000, 15000);
+      if (p.money < cost) {
+        addHistory("Не хватило денег на выход в город.", "bad");
+        return;
+      }
+      p.money -= cost;
+      p.mood = clamp(p.mood + rand(-2, 6), 0, 100);
+      p.reputation = clamp(p.reputation + rand(-1, 3), 0, 100);
+      p.network = clamp(p.network + rand(0, 3), 0, 100);
+      if (rand(1, 100) <= 20) {
+        const contactType = pick(["business", "lawyer", "it", "police", "street"]);
+        upsertContact(contactType, rand(3, 8), "новое знакомство");
+        addHistory("Новый контакт в окружении может пригодиться позже.", "good");
+      } else {
+        addHistory("Обычный выход в город без особых последствий.", "info");
+      }
+      renderAll();
+    },
+  });
+
+  return cards;
 }
 
-function renderCarInfo() {
-  const idx = Number(el.ownedCarsSelect.value);
-  const car = state.player?.assets?.[idx];
-  if (!car) {
-    el.carInfo.textContent = "Пока нет автомобилей.";
+function renderActions() {
+  const cards = buildActionCards();
+  el.actionsList.innerHTML = "";
+  cards.forEach((card) => {
+    const wrap = document.createElement("div");
+    wrap.className = "action-card";
+    wrap.innerHTML = `
+      <h5>${card.title}</h5>
+      <div class="meta">${card.meta}</div>
+    `;
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = card.disabled ? "Недоступно" : "Сделать";
+    btn.disabled = card.disabled;
+    btn.addEventListener("click", card.action);
+    wrap.appendChild(btn);
+    el.actionsList.appendChild(wrap);
+  });
+}
+
+function populateHousingMarket() {
+  el.housingMarketSelect.innerHTML = "";
+  HOUSING_MARKET.forEach((h) => {
+    const o = document.createElement("option");
+    o.value = h.id;
+    o.textContent = `${h.title} — аренда ${formatMoney(h.rent)} / цена ${formatMoney(h.price)}`;
+    el.housingMarketSelect.appendChild(o);
+  });
+  renderHousingInfo();
+}
+
+function selectedHousingItem() {
+  return HOUSING_MARKET.find((x) => x.id === el.housingMarketSelect.value) || HOUSING_MARKET[0];
+}
+
+function rentHousing() {
+  const p = state.player;
+  const h = selectedHousingItem();
+  const deposit = h.rent;
+  if (p.money < deposit) {
+    addHistory("Не хватает денег на депозит за аренду.", "bad");
     return;
   }
-  el.carInfo.textContent = `${car.model}: состояние ${car.condition}%, ежемесячные траты ~ ${formatMoney(car.monthlyCost * 1000)}.`;
+  p.money -= deposit;
+  p.housing = {
+    mode: "rent",
+    itemId: h.id,
+    district: h.district,
+    quality: h.quality,
+    weeklyRent: Math.round(h.rent / 4.33),
+    mortgageWeekly: 0,
+    mortgageLeft: 0,
+    mortgageTotal: 0,
+  };
+  addHistory(`Арендовано жилье: ${h.title}. Депозит ${formatMoney(deposit)}.`, "good");
+  renderAll();
 }
 
-function applyRandomLifeEvent() {
+function mortgageHousing() {
+  const p = state.player;
+  const h = selectedHousingItem();
+  const downPayment = Math.round(h.price * 0.2);
+  if (p.money < downPayment) {
+    addHistory("Недостаточно денег на первоначальный взнос 20%.", "bad");
+    return;
+  }
+  const baseRate = p.difficulty === "hard" ? 0.19 : 0.15;
+  const periodWeeks = 20 * 52;
+  const total = Math.round(h.price * (1 + baseRate * 0.75));
+  const weekly = Math.round((total - downPayment) / periodWeeks);
+  p.money -= downPayment;
+  p.housing = {
+    mode: "mortgage",
+    itemId: h.id,
+    district: h.district,
+    quality: h.quality,
+    weeklyRent: 0,
+    mortgageWeekly: weekly,
+    mortgageLeft: total - downPayment,
+    mortgageTotal: total,
+  };
+  p.homeEquity += downPayment;
+  addHistory(`Оформлена ипотека на ${h.title}. Взнос ${formatMoney(downPayment)}.`, "info");
+  renderAll();
+}
+
+function getWeeklyBaseCost() {
+  const p = state.player;
+  const hardMul = p.difficulty === "hard" ? 1.25 : 1;
+  let cost = rand(9000, 18000) * hardMul;
+  if (p.ageYears >= 20) cost += rand(1000, 5000);
+  return Math.round(cost);
+}
+
+function runJobWeek() {
+  const p = state.player;
+  if (!p.currentJobKey) {
+    p.stabilityWeeks = 0;
+    addHistory("Неделя прошла без стабильной работы.", "bad");
+    return;
+  }
+  const job = JOBS[p.currentJobKey];
+  if (!job) {
+    p.currentJobKey = null;
+    return;
+  }
+  if (!checkReq(job, p)) {
+    addHistory(`Ты не удержал позицию "${job.title}" из-за провала требований.`, "bad");
+    p.currentJobKey = null;
+    p.stabilityWeeks = 0;
+    return;
+  }
+  const districtPenalty = job.districtFit.includes(p.district) ? 1 : 0.86;
+  const gross = rand(Math.round(job.salary[0] / 4.33), Math.round(job.salary[1] / 4.33));
+  const finalIncome = Math.round(gross * districtPenalty * (1 + p.salaryBoost));
+  const taxAndCosts = Math.round(finalIncome * rand(8, 20) / 100);
+  const net = finalIncome - taxAndCosts;
+  p.money += net;
+  p.education = clamp(p.education + job.education + rand(-1, 1), 0, 100);
+  p.stress = clamp(p.stress + job.stress + rand(-1, 2), 0, 100);
+  p.energy = clamp(p.energy - rand(4, 9), 0, 100);
+  p.reputation = clamp(p.reputation + rand(-1, 2), 0, 100);
+  p.stabilityWeeks += 1;
+  p.riskHeat = clamp(p.riskHeat + job.risk + DISTRICTS[p.district].danger * 0.03 - p.discipline * 0.025, 0, 100);
+  addHistory(`Работа "${job.title}": чистый доход ${formatMoney(net)}.`, net > 0 ? "good" : "bad");
+}
+
+function payWeeklyBills() {
+  const p = state.player;
+  const baseCost = getWeeklyBaseCost();
+  p.money -= baseCost;
+  let homeCost = 0;
+  if (p.housing.mode === "rent") {
+    homeCost = p.housing.weeklyRent;
+    p.money -= homeCost;
+  } else if (p.housing.mode === "mortgage") {
+    homeCost = p.housing.mortgageWeekly;
+    p.money -= homeCost;
+    p.housing.mortgageLeft = Math.max(0, p.housing.mortgageLeft - p.housing.mortgageWeekly);
+    p.homeEquity += Math.round(p.housing.mortgageWeekly * 0.65);
+    if (p.housing.mortgageLeft <= 0) {
+      p.housing.mode = "owned";
+      p.housing.mortgageWeekly = 0;
+      addHistory("Ипотека полностью закрыта. Жилье теперь твое.", "good");
+    }
+  }
+  addHistory(`Бытовые расходы недели: ${formatMoney(baseCost + homeCost)}.`, "info");
+}
+
+function processDebt() {
+  const p = state.player;
+  if (p.debt <= 0) return;
+  const minPay = Math.max(4000, Math.round(p.debt * 0.01));
+  if (p.money >= minPay) {
+    p.money -= minPay;
+    p.debt = Math.max(0, p.debt - minPay);
+    if (p.debtLateWeeks > 0) p.debtLateWeeks -= 1;
+    addHistory(`Платеж по долгу: ${formatMoney(minPay)}. Остаток ${formatMoney(p.debt)}.`, "info");
+    return;
+  }
+  p.debtLateWeeks += 1;
+  p.debt = Math.round(p.debt * 1.015);
+  p.reputation = clamp(p.reputation - 2, 0, 100);
+  p.stress = clamp(p.stress + 3, 0, 100);
+  addHistory("Просрочка по долгам: растут проценты и падает репутация.", "bad");
+}
+
+function randomLifeEvent() {
   const p = state.player;
   const roll = rand(1, 100);
-  if (roll <= 10) {
-    const bonus = rand(10000, 120000);
-    p.money += bonus;
-    addHistory(`Неожиданный плюс: разовый доход ${formatMoney(bonus)}.`, "good");
-  } else if (roll <= 20) {
-    const cost = rand(10000, 80000);
+  if (roll <= 9) {
+    const cost = rand(5000, 60000);
     p.money -= cost;
-    p.stress = clamp(p.stress + 4, 0, 100);
-    addHistory(`Неожиданный расход: ${formatMoney(cost)}.`, "bad");
-  } else if (roll <= 28) {
-    p.health = clamp(p.health - rand(4, 12), 0, 100);
-    p.stress = clamp(p.stress + rand(2, 7), 0, 100);
-    addHistory("Проблемы со здоровьем: нужен отдых.", "bad");
-  } else if (roll <= 36) {
-    p.relation.trust = clamp(p.relation.trust + rand(-8, 12), 0, 100);
-    if (p.relation.trust > 12 && p.relation.status === "нет отношений") p.relation.status = "в отношениях";
-    addHistory(`Личная жизнь: ${pick(RELATION_EVENTS)}`, p.relation.trust >= 50 ? "good" : "neutral");
+    p.stress = clamp(p.stress + 3, 0, 100);
+    addHistory(`Незапланированная трата: ${formatMoney(cost)}.`, "bad");
+  } else if (roll <= 16) {
+    const bonus = rand(5000, 50000);
+    p.money += bonus;
+    addHistory(`Разовый бонус: ${formatMoney(bonus)}.`, "good");
+  } else if (roll <= 22) {
+    p.health = clamp(p.health - rand(3, 10), 0, 100);
+    p.stress = clamp(p.stress + 2, 0, 100);
+    addHistory("Проблемы со здоровьем: неделя вышла тяжелой.", "bad");
   }
 }
 
-function tryOpenCase(activity) {
-  if (activity.legality !== "illegal" && state.player.riskHeat < 35) return;
-  const baseChance = activity.legality === "illegal" ? rand(18, 45) : activity.legality === "grey" ? rand(8, 20) : rand(2, 10);
-  const chance = baseChance + Math.round(state.player.riskHeat * 0.35) - Math.round(state.player.legalShield * 0.25);
-  if (rand(1, 100) > clamp(chance, 1, 90)) return;
+function maybeOpenCase() {
+  const p = state.player;
+  const danger = DISTRICTS[p.district].danger;
+  const chance = clamp(Math.round(p.riskHeat * 0.28 + danger * 0.6 - p.legalShield * 0.2), 1, 85);
+  if (state.activeCase || rand(1, 100) > chance * 0.12) return;
   const charge = pick(LEGAL_CHARGES);
   state.activeCase = {
     article: charge.article,
-    severity: rand(1, 100),
+    stage: "investigation",
+    severity: rand(20, 90),
     monthsMin: charge.min,
     monthsMax: charge.max,
     confiscationChance: charge.confiscationChance,
-    stage: "investigation",
   };
-  addHistory(`Началась проверка: ${charge.article}.`, "bad");
+  addHistory(`Открыта проверка: ${charge.article}.`, "bad");
 }
 
 function processCase() {
   if (!state.activeCase) return;
   const p = state.player;
   const c = state.activeCase;
-  const defensePower =
-    getContactLevel("lawyer") * 0.7 +
-    getContactLevel("police") * 0.3 +
-    p.education * 0.2 +
-    p.legalShield;
+  const defense = p.legalShield + getContactLevel("lawyer") * 0.7 + getContactLevel("police") * 0.35;
 
   if (c.stage === "investigation") {
-    const roll = rand(1, 100) + c.severity * 0.25 - defensePower * 0.35;
-    if (roll < 35) {
-      addHistory("Дело развалилось на стадии проверки.", "good");
+    const roll = rand(1, 100) + c.severity * 0.32 - defense * 0.45;
+    if (roll < 28) {
+      addHistory("Проверка закрыта без суда.", "good");
       state.activeCase = null;
-      p.riskHeat = clamp(p.riskHeat - 15, 0, 100);
+      p.riskHeat = clamp(p.riskHeat - 8, 0, 100);
       return;
     }
     c.stage = "court";
-    addHistory("Материалы ушли в суд.", "bad");
+    addHistory("Материалы переданы в суд.", "bad");
     return;
   }
 
-  const sentenceRoll = rand(1, 100) + c.severity * 0.45 - defensePower * 0.5;
-  if (sentenceRoll < 40) {
-    const fine = rand(120000, 900000);
+  const sentenceRoll = rand(1, 100) + c.severity * 0.45 - defense * 0.5;
+  if (sentenceRoll < 38) {
+    const fine = rand(80000, 700000);
     p.money -= fine;
-    p.reputation = clamp(p.reputation - 10, 0, 100);
-    p.riskHeat = clamp(p.riskHeat - 10, 0, 100);
-    addHistory(`Суд: условный срок и штраф ${formatMoney(fine)}.`, "neutral");
+    p.reputation = clamp(p.reputation - 8, 0, 100);
+    addHistory(`Условный срок и штраф ${formatMoney(fine)}.`, "bad");
     state.activeCase = null;
     return;
   }
 
-  const jailMonths = rand(c.monthsMin, c.monthsMax);
-  const confiscated = rand(1, 100) <= c.confiscationChance;
-  if (confiscated) {
-    p.money = Math.max(0, Math.round(p.money * rand(0, 20) / 100));
-    p.assets = [];
-  }
+  const months = rand(c.monthsMin, c.monthsMax);
   state.inPrison = true;
-  state.prisonMonthsLeft = jailMonths;
+  state.prisonWeeksLeft = months * 4;
   p.prisonRecord += 1;
-  p.reputation = clamp(p.reputation - rand(10, 25), 0, 100);
-  addHistory(
-    `Суд: реальный срок ${Math.floor(jailMonths / 12)} лет ${jailMonths % 12} мес (${c.article}).` +
-    (confiscated ? " Часть имущества конфискована." : ""),
-    "bad"
-  );
+  p.reputation = clamp(p.reputation - rand(12, 24), 0, 100);
+  if (rand(1, 100) <= c.confiscationChance) {
+    p.money = Math.max(0, Math.round(p.money * rand(0, 30) / 100));
+    p.homeEquity = Math.round(p.homeEquity * rand(20, 60) / 100);
+    addHistory("Часть активов конфискована.", "bad");
+  }
+  addHistory(`Назначен срок: ${Math.floor(months / 12)} лет ${months % 12} мес (${c.article}).`, "bad");
   state.activeCase = null;
 }
 
-function prisonMonth() {
+function prisonTick() {
   const p = state.player;
-  state.prisonMonthsLeft -= 1;
+  state.prisonWeeksLeft -= 1;
   p.health = clamp(p.health - rand(0, 2), 0, 100);
   p.energy = clamp(p.energy - rand(0, 1), 0, 100);
-  p.stress = clamp(p.stress + rand(0, 2), 0, 100);
-  p.money -= rand(3000, 9000);
-  if (state.prisonMonthsLeft <= 0) {
+  p.stress = clamp(p.stress + rand(1, 3), 0, 100);
+  p.money -= rand(1500, 4500);
+
+  if (state.prisonWeeksLeft <= 0) {
     state.inPrison = false;
-    p.riskHeat = clamp(p.riskHeat - 25, 0, 100);
-    p.discipline = clamp(p.discipline + rand(1, 8), 0, 100);
-    p.street = clamp(p.street + rand(2, 9), 0, 100);
-    p.networkValue = clamp(p.networkValue + rand(-5, 4), 0, 100);
-    addHistory("Освобождение: часть связей потеряна, жизнь изменилась.", "neutral");
-  } else if (state.prisonMonthsLeft % 6 === 0) {
-    addHistory(`Отбывание срока: осталось ${state.prisonMonthsLeft} мес.`, "neutral");
+    p.riskHeat = clamp(p.riskHeat - 18, 0, 100);
+    p.discipline = clamp(p.discipline + rand(1, 6), 0, 100);
+    p.street = clamp(p.street + rand(2, 7), 0, 100);
+    addHistory("Освобождение после срока. Жизнь придется собирать заново.", "info");
   }
 }
 
-function tickAge() {
-  state.player.ageMonths += 1;
-  if (state.player.ageMonths >= 12) {
-    state.player.ageMonths = 0;
-    state.player.ageYears += 1;
-    addHistory(`День рождения: теперь ${state.player.ageYears}.`, "neutral");
-  }
-}
-
-function applyMonthlyExpenses() {
+function processStory() {
   const p = state.player;
-  let base = rand(18000, 52000);
-  base += p.assets.reduce((sum, car) => sum + car.monthlyCost * 1000, 0);
-  if (p.relation.status === "в отношениях") base += rand(7000, 28000);
-  if (p.ageYears >= 22) base += rand(8000, 25000);
-  p.money -= base;
-  if (p.money < 0) {
-    p.debt += Math.abs(p.money);
-    p.money = 0;
-    p.stress = clamp(p.stress + 4, 0, 100);
+  if (p.storyCompleted) return;
+  const current = MAIN_STORY_CHAIN.find((x) => x.stage === p.storyStage);
+  if (!current) return;
+  if (current.check(p)) {
+    current.effect(p);
+    addHistory(`Сюжетный прогресс ${p.storyStage}/7: ${current.text}`, "good");
+    p.storyStage += 1;
   }
 }
 
 function maybeDeath() {
   const p = state.player;
-  let chance = 0.1;
-  if (p.health < 20) chance += 4;
-  if (p.stress > 85) chance += 1.8;
-  if (p.riskHeat > 80) chance += 3.5;
-  if (state.inPrison) chance += 0.6;
+  let chance = 0.08;
+  if (p.health < 20) chance += 2.4;
+  if (p.stress > 86) chance += 1.6;
+  if (p.riskHeat > 80) chance += 1.8;
+  if (state.inPrison) chance += 0.8;
   if (rand(1, 1000) <= Math.round(chance * 10)) {
     p.isAlive = false;
-    addHistory("Критический финал жизни. Можно начать заново.", "bad");
+    addHistory("Критический жизненный исход. Начни новую жизнь.", "bad");
   }
 }
 
-function evaluateRelation() {
+function nextWeek() {
   const p = state.player;
-  if (p.mood > 60 && p.networkValue > 45 && p.relation.status === "нет отношений" && rand(1, 100) <= 8) {
-    p.relation.status = "в отношениях";
-    p.relation.trust = rand(18, 40);
-    addHistory("Начались новые отношения.", "good");
-  }
-  if (p.relation.status === "в отношениях") {
-    const drift = rand(-6, 5) + Math.round((p.mood - p.stress) * 0.04);
-    p.relation.trust = clamp(p.relation.trust + drift, 0, 100);
-    if (p.relation.trust <= 5) {
-      p.relation.status = "нет отношений";
-      p.relation.trust = 0;
-      addHistory("Отношения завершились.", "bad");
-    }
-  }
-}
-
-function processDebtAndGrowth() {
-  const p = state.player;
-  if (p.debt > 0 && p.money > 60000 && rand(1, 100) <= 35) {
-    const payment = Math.min(p.debt, rand(20000, 90000));
-    p.debt -= payment;
-    p.money -= payment;
-    addHistory(`Погашен долг на ${formatMoney(payment)}.`, "good");
-  }
-  if (careerScore() > 360 && rand(1, 100) <= 12) {
-    const boom = rand(90000, 400000);
-    p.money += boom;
-    p.reputation = clamp(p.reputation + 3, 0, 100);
-    addHistory(`Карьерный рывок: +${formatMoney(boom)}.`, "good");
-  }
-}
-
-function degradeCars() {
-  state.player.assets.forEach((car) => {
-    car.condition = clamp(car.condition - rand(0, 2), 35, 100);
-  });
-}
-
-function playMonth() {
-  if (!state.player || !state.player.isAlive) {
+  if (!p || !p.isAlive) {
     resetToMenu();
     return;
   }
-  tickAge();
-  const p = state.player;
+  p.totalWeeks += 1;
+  p.weekOfYear += 1;
+  if (p.weekOfYear > 52) {
+    p.weekOfYear = 1;
+    p.ageYears += 1;
+    addHistory(`День рождения: ${p.ageYears} лет.`, "info");
+  }
 
   if (state.inPrison) {
-    prisonMonth();
-    applyMonthlyExpenses();
+    prisonTick();
+    payWeeklyBills();
+    processDebt();
     maybeDeath();
     renderAll();
     return;
   }
 
-  const activity = ACTIVITIES.find((a) => a.key === el.activitySelect.value) || ACTIVITIES[0];
-  const place = PLACES.find((x) => x.name === el.placeSelect.value) || PLACES[0];
-  const move = SOCIAL_MOVES.find((m) => m.name === el.networkSelect.value) || SOCIAL_MOVES[0];
+  runJobWeek();
+  payWeeklyBills();
+  processDebt();
+  randomLifeEvent();
+  maybeOpenCase();
+  processCase();
+  processStory();
 
-  const income = rand(activity.income[0], activity.income[1]);
-  const expense = rand(activity.expense[0], activity.expense[1]) + place.cost;
-  p.money += income - expense;
+  p.energy = clamp(p.energy + rand(2, 6), 0, 100);
+  p.mood = clamp(p.mood + rand(-2, 3) - Math.round(p.stress * 0.02), 0, 100);
+  p.health = clamp(p.health + rand(-1, 2), 0, 100);
+  if (p.riskHeat < 35) p.lowRiskStreak += 1;
+  else p.lowRiskStreak = 0;
 
-  p.education = clamp(p.education + activity.stats.education + rand(-1, 1), 0, 100);
-  p.stress = clamp(p.stress + activity.stats.stress + rand(-2, 2), 0, 100);
-  p.reputation = clamp(p.reputation + activity.stats.rep + rand(-2, 2), 0, 100);
-  p.energy = clamp(p.energy + activity.stats.energy + rand(-2, 2), 0, 100);
-  p.health = clamp(p.health + place.health + rand(-1, 1), 0, 100);
-  p.mood = clamp(p.mood + place.mood + rand(-2, 2), 0, 100);
-  p.networkValue = clamp(p.networkValue + place.network + move.gain + rand(-1, 2), 0, 100);
-
-  p.riskHeat = clamp(
-    p.riskHeat + rand(activity.risk[0], activity.risk[1]) + place.risk + p.familyPressure * 0.08 - p.discipline * 0.03,
-    0,
-    100
-  );
-
-  upsertContact(move.contact, move.gain, "укрепление связи");
-  p.reputation = clamp(p.reputation + move.rep, 0, 100);
-
-  addHistory(
-    `${activity.name}: доход ${formatMoney(income)}, расход ${formatMoney(expense)}, итог ${formatMoney(income - expense)}.`,
-    income - expense >= 0 ? "good" : "bad"
-  );
-  if (activity.legality === "illegal") {
-    addHistory("Нелегальная активность резко увеличивает риск уголовных последствий.", "bad");
+  if (p.money < 0) {
+    p.debt += Math.abs(p.money);
+    p.money = 0;
   }
 
-  applyRandomLifeEvent();
-  tryOpenCase(activity);
-  processCase();
-  applyMonthlyExpenses();
-  processDebtAndGrowth();
-  degradeCars();
   maybeDeath();
-  evaluateRelation();
   renderAll();
 }
 
@@ -970,20 +1100,20 @@ function resetToMenu() {
 
 function renderProfile() {
   const p = state.player;
-  const status = p.isAlive ? (state.inPrison ? `В тюрьме (${state.prisonMonthsLeft} мес)` : "На свободе") : "Погиб";
+  const status = p.isAlive ? (state.inPrison ? `Лишение свободы (${state.prisonWeeksLeft} нед)` : "Свободен") : "Погиб";
   el.profileBlock.innerHTML = `
     <div><strong>${p.firstName} ${p.surname}</strong></div>
-    <div>Возраст: ${p.ageYears} лет ${p.ageMonths} мес</div>
-    <div>Город: ${p.city}</div>
+    <div>Возраст: ${p.ageYears}</div>
     <div>Семья: ${p.familyTitle}</div>
+    <div>Текущий район: ${DISTRICTS[p.district].name}</div>
     <div>Статус: ${status}</div>
-    <div>Судимостей: ${p.prisonRecord}</div>
+    <div>Сюжет: этап ${Math.min(p.storyStage, 7)}/7 ${p.storyCompleted ? "(завершен)" : ""}</div>
   `;
 }
 
 function renderStats() {
   const p = state.player;
-  const stats = [
+  const rows = [
     ["Деньги", formatMoney(p.money)],
     ["Долг", formatMoney(p.debt)],
     ["Здоровье", p.health],
@@ -992,27 +1122,59 @@ function renderStats() {
     ["Стресс", p.stress],
     ["Образование", p.education],
     ["Репутация", p.reputation],
-    ["Связи", p.networkValue],
-    ["Риск-профиль", Math.round(p.riskHeat)],
-    ["Юр. защита", Math.round(p.legalShield)],
-    ["Харизма", p.charisma],
+    ["Связи", p.network],
+    ["Риск", Math.round(p.riskHeat)],
+    ["Юр. защита", p.legalShield],
     ["Дисциплина", p.discipline],
+    ["Харизма", p.charisma],
     ["Улица", p.street],
   ];
-  el.statsBlock.innerHTML = stats.map(([k, v]) => `<div class="stat-row"><span>${k}</span><strong>${v}</strong></div>`).join("");
+  el.statsBlock.innerHTML = rows
+    .map(([k, v]) => `<div class="stat-row"><span>${k}</span><strong>${v}</strong></div>`)
+    .join("");
+}
+
+function renderJobBlock() {
+  const p = state.player;
+  const job = p.currentJobKey ? JOBS[p.currentJobKey] : null;
+  el.jobBlock.innerHTML = job
+    ? `<strong>${job.title}</strong><br/>Недельный диапазон: ${formatMoney(job.salary[0] / 4.33)} - ${formatMoney(job.salary[1] / 4.33)}`
+    : "Пока нет закрепленной работы.";
+}
+
+function renderHousingBlock() {
+  const p = state.player;
+  const h = HOUSING_MARKET.find((x) => x.id === p.housing.itemId);
+  if (!h) {
+    el.housingBlock.textContent = "Жилье не определено.";
+    return;
+  }
+  let extra = "";
+  if (p.housing.mode === "rent") {
+    extra = `Аренда/нед: ${formatMoney(p.housing.weeklyRent)}`;
+  } else if (p.housing.mode === "mortgage") {
+    extra = `Платеж/нед: ${formatMoney(p.housing.mortgageWeekly)} • Остаток: ${formatMoney(p.housing.mortgageLeft)}`;
+  } else {
+    extra = "Собственность";
+  }
+  el.housingBlock.innerHTML = `
+    <strong>${h.title}</strong><br/>
+    Район: ${DISTRICTS[h.district].name} • Качество: ${p.housing.quality}<br/>
+    ${extra}
+  `;
 }
 
 function renderContacts() {
-  const contacts = state.player.contacts
-    .sort((a, b) => b.level - a.level)
-    .map((c) => `<div>${c.type}: <strong>${c.level}</strong> <span class="small">${c.note || ""}</span></div>`)
-    .join("");
-  el.contactsBlock.innerHTML = contacts || "<div class='small'>Связей пока нет.</div>";
+  const sorted = [...state.player.contacts].sort((a, b) => b.level - a.level);
+  el.contactsBlock.innerHTML = sorted.length
+    ? sorted.map((c) => `<div>${c.type}: <strong>${c.level}</strong> <span class="small">${c.note}</span></div>`).join("")
+    : "<div class='small'>Связи пока слабые.</div>";
 }
 
-function renderRelation() {
-  const r = state.player.relation;
-  el.relationBlock.innerHTML = `<div>Статус: <strong>${r.status}</strong></div><div>Доверие: <strong>${r.trust}</strong></div>`;
+function renderHousingInfo() {
+  const h = selectedHousingItem();
+  const mortgageFirst = Math.round(h.price * 0.2);
+  el.housingInfo.textContent = `${h.title}: аренда ${formatMoney(h.rent)}, цена ${formatMoney(h.price)}, первый взнос ${formatMoney(mortgageFirst)}.`;
 }
 
 function renderCasePanel() {
@@ -1025,29 +1187,36 @@ function renderCasePanel() {
   el.casePanel.innerHTML = `<strong>Активное дело:</strong> ${c.article}<br/>Стадия: ${c.stage}<br/>Тяжесть: ${Math.round(c.severity)}`;
 }
 
-function renderTimeline() {
-  el.timeline.innerHTML = state.history
-    .slice(0, 200)
-    .map((item) => `<div class="event ${item.type}"><span class="time">${item.stamp}</span> — ${item.text}</div>`)
-    .join("");
+function renderTime() {
+  const p = state.player;
+  el.timeBlock.innerHTML = `
+    Неделя: ${p.weekOfYear}/52 • Возраст: ${p.ageYears}<br/>
+    Старт случайный: ${p.familyStory}<br/>
+    Недель стабильности: ${p.stabilityWeeks} • Низкий риск подряд: ${p.lowRiskStreak}
+  `;
 }
 
-function getAssetsValue() {
-  return state.player.assets.reduce((sum, car) => sum + car.buyPrice * (car.condition / 100), 0);
+function renderTimeline() {
+  el.timeline.innerHTML = state.history
+    .slice(0, 180)
+    .map((x) => `<div class="event ${x.type || "info"}"><span class="time">${x.stamp}</span> ${x.text}</div>`)
+    .join("");
 }
 
 function renderAll() {
   if (!state.player) return;
-  state.player.assetsValue = getAssetsValue();
   renderProfile();
   renderStats();
+  renderJobBlock();
+  renderHousingBlock();
   renderContacts();
-  renderRelation();
+  renderDistrictInfo();
+  renderActions();
+  renderHousingInfo();
   renderCasePanel();
-  refreshOwnedCars();
-  renderActivityInfo();
-  el.scenarioCount.textContent = `Комбинаций на один ход: ${estimateScenarioCount().toLocaleString("ru-RU")}+ (семьи × темы × места × связи × авто)`;
-  el.advanceBtn.textContent = state.player.isAlive ? "Прожить месяц" : "Начать новую жизнь";
+  renderTime();
+  updateMapStyles();
+  moveMarkerTo(state.player.district);
 }
 
 initSetup();
