@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Street Life // Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>STREET LIFE // OPEN CITY</h1>
+      <p class="subtitle">2D open-world life prototype: карта, работа, риски, жилье, сюжет</p>
+    </header>
+
+    <section id="setupScreen" class="card setup">
+      <h2>Старт новой жизни</h2>
+      <p class="small warning">
+        Семья генерируется случайно. Старт не выбирается вручную.
+      </p>
+      <div class="grid two">
+        <label>
+          Имя
+          <input id="firstNameInput" type="text" maxlength="24" placeholder="Например, Артем" />
+        </label>
+        <label>
+          Режим
+          <select id="difficultySelect">
+            <option value="normal">Реализм</option>
+            <option value="hard">Хардкор</option>
+          </select>
+        </label>
+      </div>
+      <div id="familyPreview" class="mission-box small"></div>
+      <button id="startBtn" class="btn primary">Начать в 16 лет</button>
+    </section>
+
+    <section id="gameScreen" class="hidden">
+      <div class="main-layout">
+        <article class="card">
+          <h3>Персонаж</h3>
+          <div id="profileBlock" class="hud-grid"></div>
+          <div class="separator"></div>
+          <div id="statsBlock" class="hud-grid"></div>
+          <div class="separator"></div>
+          <h4>Карьера</h4>
+          <div id="jobBlock" class="small"></div>
+          <div class="separator"></div>
+          <h4>Жилье</h4>
+          <div id="housingBlock" class="small"></div>
+          <div class="separator"></div>
+          <h4>Контакты</h4>
+          <div id="contactsBlock" class="small"></div>
+        </article>
+
+        <article class="card">
+          <h3>Карта города</h3>
+          <div class="map-wrap">
+            <canvas id="gameCanvas" width="1280" height="720"></canvas>
+          </div>
+          <div class="controls">
+            <button id="travelBtn" class="btn">Переместиться в выбранный район</button>
+            <button id="nextWeekBtn" class="btn primary">Следующая неделя</button>
+          </div>
+          <div class="separator"></div>
+          <div id="districtInfo" class="small"></div>
+          <div id="timeBlock" class="small"></div>
+          <div id="casePanel" class="mission-box hidden"></div>
+        </article>
+
+        <article class="card">
+          <h3>Действия</h3>
+          <div id="actionsList"></div>
+          <div class="separator"></div>
+          <h4>Недвижимость</h4>
+          <label>
+            Объекты
+            <select id="housingMarketSelect"></select>
+          </label>
+          <div class="controls">
+            <button id="rentBtn" class="btn">Арендовать</button>
+            <button id="mortgageBtn" class="btn">Ипотека</button>
+          </div>
+          <div id="housingInfo" class="small"></div>
+          <div class="separator"></div>
+          <h4>Лог событий</h4>
+          <div id="timeline" class="log"></div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
