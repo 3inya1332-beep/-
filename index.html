@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real Life Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>REAL LIFE // SIM</h1>
+      <p class="subtitle">Глубокий симулятор жизни с процедурной генерацией сценариев</p>
+    </header>
+
+    <section id="setupScreen" class="card setup">
+      <h2>Создание персонажа</h2>
+      <p class="small warning">
+        Важно: это художественная симуляция. Незаконные пути в игре ведут к рискам, уголовным последствиям и разрушению жизни персонажа.
+      </p>
+      <div class="grid two">
+        <label>
+          Имя
+          <input id="firstNameInput" type="text" maxlength="24" placeholder="Например, Артём" />
+        </label>
+        <label>
+          Город
+          <select id="citySelect"></select>
+        </label>
+      </div>
+      <label>
+        Семейный сценарий (100+ историй)
+        <select id="familySelect"></select>
+      </label>
+      <div id="familyPreview" class="family-preview"></div>
+      <button id="startBtn" class="btn primary">Начать в 16 лет</button>
+    </section>
+
+    <section id="gameScreen" class="hidden">
+      <div class="grid main-layout">
+        <article class="card">
+          <h3>Профиль</h3>
+          <div id="profileBlock" class="profile"></div>
+          <div id="statsBlock" class="stats"></div>
+          <div class="separator"></div>
+          <h4>Контакты</h4>
+          <div id="contactsBlock" class="contacts"></div>
+          <div class="separator"></div>
+          <h4>Отношения</h4>
+          <div id="relationBlock"></div>
+        </article>
+
+        <article class="card">
+          <h3>Действие на месяц</h3>
+          <div id="scenarioCount" class="small"></div>
+          <label>
+            Основное занятие
+            <select id="activitySelect"></select>
+          </label>
+          <div id="activityInfo" class="small"></div>
+          <label>
+            Досуг / место
+            <select id="placeSelect"></select>
+          </label>
+          <label>
+            Социальный ход
+            <select id="networkSelect"></select>
+          </label>
+          <div class="inline">
+            <button id="advanceBtn" class="btn primary">Прожить месяц</button>
+            <button id="securityBtn" class="btn">Безопасность +5 000 ₽</button>
+            <button id="familyHelpBtn" class="btn">Семья решает вопрос</button>
+          </div>
+          <div id="casePanel" class="case-panel hidden"></div>
+        </article>
+
+        <article class="card">
+          <h3>Автопарк (50+ моделей)</h3>
+          <label>
+            Купить авто
+            <select id="carMarketSelect"></select>
+          </label>
+          <div class="inline">
+            <button id="buyCarBtn" class="btn">Купить</button>
+            <button id="sellCarBtn" class="btn">Продать выбранную</button>
+          </div>
+          <label>
+            Ваши авто
+            <select id="ownedCarsSelect"></select>
+          </label>
+          <div id="carInfo" class="small"></div>
+        </article>
+      </div>
+
+      <article class="card timeline">
+        <h3>История жизни</h3>
+        <div id="timeline"></div>
+      </article>
+    </section>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
