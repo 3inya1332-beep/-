@@ -3,106 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Real Life Simulator V2</title>
+  <title>Street Life // Prototype</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <h1>REAL LIFE // V2</h1>
-      <p class="subtitle">Неделя за неделей: карта города, жилье, работа, риски и длинные сюжетные ветки</p>
+  <div class="hud-wrap">
+    <header class="hud-top">
+      <div class="title">STREET LIFE // OPEN CITY</div>
+      <div id="clockLabel" class="clock">День 1 • 08:00</div>
     </header>
 
-    <section id="setupScreen" class="card setup">
-      <h2>Старт новой жизни</h2>
-      <p class="small warning">
-        Семья и стартовые условия генерируются случайно. Ты не выбираешь идеальный старт — нужно жить в тех обстоятельствах, которые выпали.
-      </p>
-      <div class="grid two">
-        <label>
-          Имя
-          <input id="firstNameInput" type="text" maxlength="24" placeholder="Например, Артем" />
-        </label>
-        <label>
-          Режим
-          <select id="difficultySelect">
-            <option value="normal">Реализм</option>
-            <option value="hard">Хардкор (дороже жизнь, выше риски)</option>
-          </select>
-        </label>
-      </div>
-      <div id="familyPreview" class="family-preview">
-        При старте игра случайно определит семью, район, жилье и предысторию 0-16 лет.
-      </div>
-      <button id="startBtn" class="btn primary">Начать в 16 лет</button>
-    </section>
+    <section class="hud-panels">
+      <aside class="panel left">
+        <h3>Персонаж</h3>
+        <div id="profilePanel"></div>
+        <div class="sep"></div>
+        <h4>Активная задача</h4>
+        <div id="missionPanel" class="small"></div>
+        <div class="sep"></div>
+        <h4>Подсказки</h4>
+        <ul class="small">
+          <li>WASD — передвижение</li>
+          <li>E — взаимодействие с местом</li>
+          <li>Shift — бег</li>
+          <li>M — скрыть/показать карту</li>
+        </ul>
+      </aside>
 
-    <section id="gameScreen" class="hidden">
-      <div class="grid main-layout">
-        <article class="card">
-          <h3>Профиль и статус</h3>
-          <div id="profileBlock" class="profile"></div>
-          <div id="statsBlock" class="stats"></div>
-          <div class="separator"></div>
-          <h4>Работа</h4>
-          <div id="jobBlock" class="small"></div>
-          <div class="separator"></div>
-          <h4>Жилье / ипотека</h4>
-          <div id="housingBlock" class="small"></div>
-          <div class="separator"></div>
-          <h4>Связи</h4>
-          <div id="contactsBlock" class="contacts"></div>
-        </article>
+      <main class="game-area">
+        <canvas id="gameCanvas" width="1200" height="700"></canvas>
+      </main>
 
-        <article class="card">
-          <h3>Карта города</h3>
-          <p class="small">Нажми на район. Перемещение и время ограничены: 1 действие в неделю.</p>
-          <div id="mapWrap" class="map-wrap">
-            <svg id="cityMap" viewBox="0 0 620 420" aria-label="Карта города">
-              <rect data-district="north" x="20" y="20" width="180" height="110" rx="12"></rect>
-              <rect data-district="university" x="220" y="20" width="180" height="110" rx="12"></rect>
-              <rect data-district="tech" x="420" y="20" width="180" height="110" rx="12"></rect>
-
-              <rect data-district="west" x="20" y="155" width="180" height="110" rx="12"></rect>
-              <rect data-district="center" x="220" y="155" width="180" height="110" rx="12"></rect>
-              <rect data-district="east" x="420" y="155" width="180" height="110" rx="12"></rect>
-
-              <rect data-district="industrial" x="20" y="290" width="180" height="110" rx="12"></rect>
-              <rect data-district="suburb" x="220" y="290" width="180" height="110" rx="12"></rect>
-              <rect data-district="elite" x="420" y="290" width="180" height="110" rx="12"></rect>
-            </svg>
-            <div id="playerMarker" class="player-marker"></div>
-          </div>
-          <div id="districtInfo" class="small"></div>
-          <div class="inline">
-            <button id="travelBtn" class="btn">Переместиться</button>
-            <button id="nextWeekBtn" class="btn primary">Следующая неделя</button>
-          </div>
-          <div id="casePanel" class="case-panel hidden"></div>
-        </article>
-
-        <article class="card">
-          <h3>Контекстные действия</h3>
-          <div id="timeBlock" class="small"></div>
-          <div id="actionsList" class="actions-list"></div>
-          <div class="separator"></div>
-          <h4>Недвижимость</h4>
-          <label>
-            Рынок жилья
-            <select id="housingMarketSelect"></select>
-          </label>
-          <div class="inline">
-            <button id="rentBtn" class="btn">Арендовать</button>
-            <button id="mortgageBtn" class="btn">Взять в ипотеку</button>
-          </div>
-          <div id="housingInfo" class="small"></div>
-        </article>
-      </div>
-
-      <article class="card timeline">
-        <h3>История жизни</h3>
-        <div id="timeline"></div>
-      </article>
+      <aside class="panel right">
+        <h3>Лог событий</h3>
+        <div id="logPanel" class="log"></div>
+        <div class="sep"></div>
+        <h4>Финансы</h4>
+        <div id="financePanel" class="small"></div>
+        <div class="sep"></div>
+        <h4>Связи и репутация</h4>
+        <div id="socialPanel" class="small"></div>
+      </aside>
     </section>
   </div>
 
