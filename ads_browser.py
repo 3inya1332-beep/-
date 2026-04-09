@@ -2,11 +2,15 @@
 AdsPower Browser API wrapper.
 Handles profile creation, starting/stopping browser sessions,
 and obtaining Selenium WebDriver connections.
+
+Supports 9Proxy GB-traffic proxies (niceproxy.io) where each profile
+gets a unique session ID so that every browser runs on its own IP.
 """
 
 import logging
-import re
-from urllib.parse import urlparse
+import random
+import string
+from urllib.parse import urlparse, urlunparse
 
 import requests
 from selenium import webdriver
@@ -17,31 +21,43 @@ import config
 
 logger = logging.getLogger(__name__)
 
+SSID_PLACEHOLDER = "_ssid_"
 
-def parse_proxy(proxy_url: str) -> dict | None:
-    """
-    Parse a proxy URL into the dict AdsPower expects.
 
-    Supported formats:
-        socks5://user:pass@host:port
-        http://user:pass@host:port
-        http://host:port
-        host:port:user:pass  (legacy)
+def _generate_session_id(length: int = 8) -> str:
+    """Random alphanumeric session ID for 9Proxy sticky sessions."""
+    return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
-    Returns dict with keys: proxy_soft, proxy_type, proxy_host, proxy_port,
-                            proxy_user, proxy_password
-    or None if the string is empty / comment.
-    """
-    line = proxy_url.strip()
+
+def parse_proxy_template(raw_line: str) -> str | None:
+    """Return a cleaned proxy line (template) or None for blanks/comments."""
+    line = raw_line.strip()
     if not line or line.startswith("#"):
         return None
+    return line
 
-    scheme_map = {
-        "socks5": "socks5",
-        "socks4": "socks4",
-        "http": "http",
-        "https": "https",
-    }
+
+def build_proxy_for_profile(template: str, profile_index: int) -> dict:
+    """
+    Take a proxy template string, replace the ``_ssid_`` placeholder with
+    a unique session ID, then parse into the dict AdsPower expects.
+
+    Supported template formats (9Proxy GB-traffic and regular):
+        socks5://user:pass@host:port          (URL style)
+        http://user:pass@host:port
+        host:port:user:pass                   (legacy)
+        user:pass@host:port                   (compact)
+
+    9Proxy example:
+        socks5://sub_user-country-US-ssid-_ssid_-sst-120:pwd@niceproxy.io:17521
+
+    The ``_ssid_`` token is replaced with a per-profile random ID so that
+    each AdsPower profile gets a different residential IP.
+    """
+    unique_ssid = _generate_session_id()
+    line = template.replace(SSID_PLACEHOLDER, unique_ssid)
+
+    scheme_map = {"socks5": "socks5", "socks4": "socks4", "http": "http", "https": "https"}
 
     parsed = urlparse(line)
     if parsed.scheme in scheme_map:
@@ -50,18 +66,31 @@ def parse_proxy(proxy_url: str) -> dict | None:
         port = str(parsed.port) if parsed.port else ""
         user = parsed.username or ""
         password = parsed.password or ""
+    elif "@" in line:
+        auth_part, addr_part = line.rsplit("@", 1)
+        host_port = addr_part.split(":")
+        host = host_port[0]
+        port = host_port[1] if len(host_port) > 1 else ""
+        cred = auth_part.split(":", 1)
+        user = cred[0]
+        password = cred[1] if len(cred) > 1 else ""
+        proxy_type = "socks5"
     else:
         parts = line.split(":")
         if len(parts) == 4:
             host, port, user, password = parts
-            proxy_type = "socks5"
         elif len(parts) == 2:
             host, port = parts
             user, password = "", ""
-            proxy_type = "socks5"
         else:
             logger.warning("Cannot parse proxy: %s", line)
-            return None
+            return _empty_proxy()
+        proxy_type = "socks5"
+
+    logger.info(
+        "Profile #%d → %s://%s:%s (session %s)",
+        profile_index, proxy_type, host, port, unique_ssid,
+    )
 
     return {
         "proxy_soft": "other",
@@ -70,6 +99,17 @@ def parse_proxy(proxy_url: str) -> dict | None:
         "proxy_port": port,
         "proxy_user": user,
         "proxy_password": password,
+    }
+
+
+def _empty_proxy() -> dict:
+    return {
+        "proxy_soft": "other",
+        "proxy_type": "socks5",
+        "proxy_host": "",
+        "proxy_port": "",
+        "proxy_user": "",
+        "proxy_password": "",
     }
 
 

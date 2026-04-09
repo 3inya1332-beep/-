@@ -20,7 +20,7 @@ import argparse
 from pathlib import Path
 
 import config
-from ads_browser import AdsPowerClient, parse_proxy
+from ads_browser import AdsPowerClient, parse_proxy_template, build_proxy_for_profile
 from gmail_auth import login_gmail
 from gmail_sender import send_email
 
@@ -70,16 +70,20 @@ def load_emails(path: str) -> list[str]:
     return emails
 
 
-def load_proxies(path: str) -> list[dict]:
-    """Read proxy list and parse each line into an AdsPower proxy dict."""
-    proxies = []
+def load_proxy_templates(path: str) -> list[str]:
+    """Read proxy template lines from file (one per line, # = comment).
+
+    Each line is a proxy *template* — may contain ``_ssid_`` placeholder
+    that will be replaced with a unique session ID per profile.
+    """
+    templates: list[str] = []
     if not Path(path).exists():
-        return proxies
+        return templates
     for raw in Path(path).read_text(encoding="utf-8").splitlines():
-        p = parse_proxy(raw)
-        if p:
-            proxies.append(p)
-    return proxies
+        t = parse_proxy_template(raw)
+        if t:
+            templates.append(t)
+    return templates
 
 
 def load_text(path: str) -> str:
@@ -93,12 +97,14 @@ def load_text(path: str) -> str:
 def setup_profiles(
     ads: AdsPowerClient,
     accounts: list[dict],
-    proxies: list[dict] | None = None,
+    proxy_templates: list[str] | None = None,
 ) -> list[dict]:
     """
-    For every account create an AdsPower profile (with proxy if available),
-    start the browser, log in to Gmail, and store the driver + profile id.
-    Returns a list of dicts: {account, user_id, driver, logged_in}.
+    For every account create an AdsPower profile (with unique proxy if
+    templates are available), start the browser, log in to Gmail.
+
+    Each profile receives its own session ID so 9Proxy assigns a
+    different IP per browser.
     """
     group_id = ads.get_or_create_group(config.ADS_GROUP_NAME)
     profiles = []
@@ -107,8 +113,9 @@ def setup_profiles(
         name = f"{config.ADS_PROFILE_PREFIX}{idx}"
 
         proxy = None
-        if proxies:
-            proxy = proxies[(idx - 1) % len(proxies)]
+        if proxy_templates:
+            tpl = proxy_templates[(idx - 1) % len(proxy_templates)]
+            proxy = build_proxy_for_profile(tpl, idx)
 
         logger.info("[%d/%d] Creating profile '%s' for %s …",
                      idx, len(accounts), name, acct["email"])
@@ -263,11 +270,14 @@ def main() -> None:
         sys.exit(1)
     logger.info("Loaded %d recipient(s)", len(recipients))
 
-    proxies = load_proxies(args.proxies)
-    if proxies:
-        logger.info("Loaded %d proxy(ies) — will distribute round-robin across accounts", len(proxies))
+    proxy_templates = load_proxy_templates(args.proxies)
+    if proxy_templates:
+        logger.info(
+            "Loaded %d proxy template(s) — каждый профиль получит уникальный session ID",
+            len(proxy_templates),
+        )
     else:
-        logger.info("No proxies loaded — profiles will be created without proxy")
+        logger.info("Прокси не загружены — профили будут без прокси")
 
     subject = load_text(args.subject_file)
     body = load_text(args.message_file)
@@ -287,7 +297,7 @@ def main() -> None:
         sys.exit(1)
 
     # ---- Create profiles & log in ----
-    profiles = setup_profiles(ads, accounts, proxies=proxies)
+    profiles = setup_profiles(ads, accounts, proxy_templates=proxy_templates)
 
     if args.login_only:
         logger.info("--login-only mode: skipping email sending.")

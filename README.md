@@ -49,17 +49,25 @@ john.doe@gmail.com:MySecurePass
 
 ## Proxy list (`data/proxies.txt`)
 
+Предназначен для **9Proxy GB-трафик** (niceproxy.io) и обычных прокси.
+
 ```
-# protocol://user:password@host:port
-socks5://malanda43_UAZs-country-_country_-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521
+# 9Proxy GB-traffic — _ssid_ заменяется автоматически на уникальный ID
+socks5://malanda43_UAZs-country-US-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521
+
+# Обычный прокси (без шаблона)
 http://user:pass@proxy.example.com:8080
 ```
 
-Supported protocols: `socks5`, `socks4`, `http`, `https`.
+**Как работает `_ssid_`:** при создании каждого профиля скрипт заменяет `_ssid_` на случайный уникальный ID. Это значит, что каждый аккаунт Gmail получит **свой отдельный IP** от 9Proxy.
 
-Proxies are distributed across accounts in round-robin order.
-If you have 2 proxies and 5 accounts, accounts 1 & 3 & 5 use proxy 1, accounts 2 & 4 use proxy 2.
-If the file is empty or missing, profiles are created without a proxy.
+Параметры в юзернейме 9Proxy:
+- `country-XX` — код страны (US, DE, RU)
+- `ssid-_ssid_` — session ID (заменяется автоматически)
+- `sst-120` — время жизни сессии в минутах
+
+Поддерживаемые протоколы: `socks5`, `socks4`, `http`, `https`.
+Если файл пустой или отсутствует — профили создаются без прокси.
 
 ## Recipient list (`data/emails.txt`)
 

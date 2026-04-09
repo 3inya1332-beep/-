@@ -1,8 +1,18 @@
-# Прокси — один на строку
-# Формат: socks5://user:password@host:port
-# Также поддерживаются: http://, https://, socks4://
-# Прокси распределяются по аккаунтам round-robin:
-#   аккаунт 1 → прокси 1, аккаунт 2 → прокси 2, и т.д.
+# 9Proxy GB-трафик прокси — один шаблон на строку
 #
-# Пример:
-# socks5://malanda43_UAZs-country-_country_-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521
+# _ssid_ будет автоматически заменён на уникальный session ID
+# для каждого профиля, чтобы каждый аккаунт получил свой IP.
+#
+# Формат: socks5://username:password@host:port
+#
+# Пример (9Proxy GB-traffic):
+# socks5://malanda43_UAZs-country-US-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521
+#
+# Параметры в юзернейме (9Proxy):
+#   country-XX  — код страны (US, DE, RU и т.д.)
+#   ssid-_ssid_ — session ID (заменяется автоматически)
+#   sst-120     — время жизни сессии в минутах
+#
+# Также поддерживаются обычные прокси без _ssid_:
+# socks5://user:pass@host:port
+# http://user:pass@host:port
