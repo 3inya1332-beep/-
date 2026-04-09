@@ -30,7 +30,8 @@ pip install -r requirements.txt
 ├── gmail_sender.py      # Gmail compose & send
 ├── data/
 │   ├── accounts.txt     # Gmail accounts (one per line)
-│   └── emails.txt       # Recipient emails (one per line)
+│   ├── emails.txt       # Recipient emails (one per line)
+│   └── proxies.txt      # Proxy list (one per line)
 └── templates/
     ├── subject.txt      # Email subject line
     └── message.txt      # Email body text
@@ -45,6 +46,20 @@ john.doe@gmail.com:MySecurePass
 ```
 
 - **recovery_email** — optional; used when Google asks to confirm the backup address during login.
+
+## Proxy list (`data/proxies.txt`)
+
+```
+# protocol://user:password@host:port
+socks5://malanda43_UAZs-country-_country_-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521
+http://user:pass@proxy.example.com:8080
+```
+
+Supported protocols: `socks5`, `socks4`, `http`, `https`.
+
+Proxies are distributed across accounts in round-robin order.
+If you have 2 proxies and 5 accounts, accounts 1 & 3 & 5 use proxy 1, accounts 2 & 4 use proxy 2.
+If the file is empty or missing, profiles are created without a proxy.
 
 ## Recipient list (`data/emails.txt`)
 
@@ -80,6 +95,7 @@ python main.py --no-cleanup
 python main.py \
   --accounts my_accounts.txt \
   --emails my_recipients.txt \
+  --proxies my_proxies.txt \
   --subject-file my_subject.txt \
   --message-file my_body.txt
 ```
@@ -116,9 +132,9 @@ All delays and settings are in `config.py`:
 
 ## How it works
 
-1. **Reads** accounts from `data/accounts.txt` and recipients from `data/emails.txt`
+1. **Reads** accounts from `data/accounts.txt`, recipients from `data/emails.txt`, proxies from `data/proxies.txt`
 2. **Connects** to the running AdsPower application via its local HTTP API
-3. **Creates** one browser profile per Gmail account
+3. **Creates** one browser profile per Gmail account (with proxy if available)
 4. **Opens** each profile, navigates to the Google sign-in page, enters credentials
 5. If Google asks for recovery email verification — enters the backup address automatically
 6. **Distributes** recipient emails across logged-in accounts (round-robin)

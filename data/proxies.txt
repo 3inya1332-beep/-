@@ -1,0 +1,8 @@
+# Прокси — один на строку
+# Формат: socks5://user:password@host:port
+# Также поддерживаются: http://, https://, socks4://
+# Прокси распределяются по аккаунтам round-robin:
+#   аккаунт 1 → прокси 1, аккаунт 2 → прокси 2, и т.д.
+#
+# Пример:
+# socks5://malanda43_UAZs-country-_country_-ssid-_ssid_-sst-120:ff322@niceproxy.io:17521

@@ -11,6 +11,7 @@ ADS_API_URL = "http://local.adspower.net:50325"
 # --- File paths ---
 ACCOUNTS_FILE = "data/accounts.txt"
 EMAILS_FILE = "data/emails.txt"
+PROXIES_FILE = "data/proxies.txt"
 SUBJECT_FILE = "templates/subject.txt"
 MESSAGE_FILE = "templates/message.txt"
 

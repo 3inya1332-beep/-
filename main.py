@@ -20,7 +20,7 @@ import argparse
 from pathlib import Path
 
 import config
-from ads_browser import AdsPowerClient
+from ads_browser import AdsPowerClient, parse_proxy
 from gmail_auth import login_gmail
 from gmail_sender import send_email
 
@@ -70,6 +70,18 @@ def load_emails(path: str) -> list[str]:
     return emails
 
 
+def load_proxies(path: str) -> list[dict]:
+    """Read proxy list and parse each line into an AdsPower proxy dict."""
+    proxies = []
+    if not Path(path).exists():
+        return proxies
+    for raw in Path(path).read_text(encoding="utf-8").splitlines():
+        p = parse_proxy(raw)
+        if p:
+            proxies.append(p)
+    return proxies
+
+
 def load_text(path: str) -> str:
     return Path(path).read_text(encoding="utf-8").strip()
 
@@ -81,10 +93,11 @@ def load_text(path: str) -> str:
 def setup_profiles(
     ads: AdsPowerClient,
     accounts: list[dict],
+    proxies: list[dict] | None = None,
 ) -> list[dict]:
     """
-    For every account create an AdsPower profile, start the browser,
-    log in to Gmail, and store the driver + profile id.
+    For every account create an AdsPower profile (with proxy if available),
+    start the browser, log in to Gmail, and store the driver + profile id.
     Returns a list of dicts: {account, user_id, driver, logged_in}.
     """
     group_id = ads.get_or_create_group(config.ADS_GROUP_NAME)
@@ -92,9 +105,14 @@ def setup_profiles(
 
     for idx, acct in enumerate(accounts, start=1):
         name = f"{config.ADS_PROFILE_PREFIX}{idx}"
+
+        proxy = None
+        if proxies:
+            proxy = proxies[(idx - 1) % len(proxies)]
+
         logger.info("[%d/%d] Creating profile '%s' for %s …",
                      idx, len(accounts), name, acct["email"])
-        user_id = ads.create_profile(name, group_id)
+        user_id = ads.create_profile(name, group_id, proxy=proxy)
 
         try:
             driver = ads.get_driver(user_id)
@@ -207,6 +225,10 @@ def parse_args() -> argparse.Namespace:
         help="Path to recipient emails file (default: %(default)s)",
     )
     p.add_argument(
+        "--proxies", default=config.PROXIES_FILE,
+        help="Path to proxies file (default: %(default)s)",
+    )
+    p.add_argument(
         "--subject-file", default=config.SUBJECT_FILE,
         help="Path to subject template (default: %(default)s)",
     )
@@ -241,6 +263,12 @@ def main() -> None:
         sys.exit(1)
     logger.info("Loaded %d recipient(s)", len(recipients))
 
+    proxies = load_proxies(args.proxies)
+    if proxies:
+        logger.info("Loaded %d proxy(ies) — will distribute round-robin across accounts", len(proxies))
+    else:
+        logger.info("No proxies loaded — profiles will be created without proxy")
+
     subject = load_text(args.subject_file)
     body = load_text(args.message_file)
 
@@ -259,7 +287,7 @@ def main() -> None:
         sys.exit(1)
 
     # ---- Create profiles & log in ----
-    profiles = setup_profiles(ads, accounts)
+    profiles = setup_profiles(ads, accounts, proxies=proxies)
 
     if args.login_only:
         logger.info("--login-only mode: skipping email sending.")
