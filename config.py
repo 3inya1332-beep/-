@@ -4,6 +4,8 @@ Edit these settings to match your environment.
 """
 
 # --- AdsPower settings ---
+# Подключение напрямую через соединение, без API Key.
+# В AdsPower: «Проверка API» должна быть ВЫКЛЮЧЕНА.
 ADS_API_URL = "http://local.adspower.net:50325"
 
 # --- File paths ---

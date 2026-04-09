@@ -244,14 +244,16 @@ def main() -> None:
     subject = load_text(args.subject_file)
     body = load_text(args.message_file)
 
-    # ---- Connect to AdsPower ----
+    # ---- Connect to AdsPower (без API Key, через прямое соединение) ----
     ads = AdsPowerClient()
     try:
         status = ads.status()
-        logger.info("AdsPower status: %s", status)
+        logger.info("AdsPower подключён: %s", status)
     except Exception:
         logger.error(
-            "Cannot reach AdsPower at %s — make sure it is running.",
+            "Не удалось подключиться к AdsPower по адресу %s\n"
+            "  → Убедитесь что AdsPower запущен\n"
+            "  → Галочка «Проверка API» должна быть ВЫКЛЮЧЕНА",
             config.ADS_API_URL,
         )
         sys.exit(1)
