@@ -1,0 +1,5 @@
+# Gmail accounts — one per line
+# Format: gmail:password  or  gmail:password:recovery_email
+# Example:
+# itx.ashely.graham@gmail.com:97hNwg9cVMh:cefisin162@merumart.com
+# john.doe@gmail.com:MyP4ssw0rd

@@ -1,0 +1,4 @@
+# Recipient email addresses — one per line
+# Example:
+# recipient1@example.com
+# recipient2@example.com
